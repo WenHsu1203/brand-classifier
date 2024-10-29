@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, SetStateAction } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -93,44 +93,50 @@ const InstagramScraper = ({ onDataReceived, onComplete }: {
   }
 
   return (
-    <div className="flex flex-col items-center space-y-4">
-      <form onSubmit={handleScrape}>
-        <div className="flex w-full max-w-md">
+    <div className="flex flex-col items-center space-y-4 w-full mx-auto px-4"> {/* Added px-4 for padding */}
+      <form onSubmit={handleScrape} className="w-full flex justify-center"> {/* Added flex and justify-center */}
+        <div className="flex flex-col sm:flex-row gap-4 items-center"> {/* Added max-w-xl to container */}
           <Input
-            className="flex-grow rounded-r-none border-2 border-r-0 border-purple-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="w-[300px] border-2 border-purple-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg py-6"
             placeholder="@heyitsmindyy"
             type="text"
             value={account}
             onChange={(e) => setAccount(e.target.value)}
           />
           <Button
-            className="rounded-l-none bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white font-semibold"
+            className="w-[120px] bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white font-semibold whitespace-nowrap px-8 py-6"
             type="submit"
             disabled={isLoading}
           >
             {isLoading ? (
-              <span className="inline-flex items-center">
+              <span className="inline-flex items-center justify-center w-full">
                 分析中
                 <span className="inline-flex w-12 justify-start ml-1">
                   <span className="animate-[bounce_1s_infinite_0ms]">.</span>
                   <span className="animate-[bounce_1s_infinite_200ms]">.</span>
                   <span className="animate-[bounce_1s_infinite_400ms]">.</span>
                 </span>
-                (可能會需要30秒左右, 可以先去上個廁所💩)
               </span>
             ) : '分析'}
           </Button>
         </div>
       </form>
-      {error && (
-        <p className="text-sm text-red-500 font-medium">
-          ❌ {error}
+      {
+        error && (
+          <p className="text-sm text-red-500 font-medium">
+            ❌ {error}
+          </p>
+        )
+      }
+      {isLoading && (
+        <p className="text-sm bg-gradient-to-r from-purple-500 to-orange-500 bg-clip-text text-transparent font-medium mt-2">
+          可能會需要30秒, 可以先去上個廁所💩
         </p>
       )}
-      <p className="text-sm text-orange-500 font-medium">
+      <p className="text-sm text-orange-500 font-medium text-center"> {/* Added text-center */}
         ⚠️ 僅開放商業帳號使用（轉成商業帳號就可以玩了唷 😊）
       </p>
-    </div>
+    </div >
   )
 }
 
@@ -181,7 +187,7 @@ export default function BrandStrategyDashboard() {
             >
               聯絡我們
             </a>
-            <Button 
+            <Button
               className="bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white"
               onClick={() => {
                 aiGeneratorRef.current?.scrollIntoView({
@@ -226,7 +232,7 @@ export default function BrandStrategyDashboard() {
         },
         {
           title: "成熟女性市場",
-          content: "專注於35-50歲的成熟女性市場，她們重視抗衰老和高效護膚，願意投資於優質護膚品。"
+          content: "專注於35-50歲的��熟女性市場，她們重視抗衰老和高效護膚，願意投資於優質護膚品。"
         },
         {
           title: "男士護膚市場",
@@ -327,43 +333,42 @@ export default function BrandStrategyDashboard() {
     },
   ]
 
-  const colorPalette = [
-    { color: "#F9E5D8", name: "柔和米色" },
-    { color: "#F7CAC9", name: "淡粉色" },
-    { color: "#B5D6E0", name: "淺藍色" },
-    { color: "#C9A8A9", name: "玫瑰褐色" },
-    { color: "#E5E0DC", name: "灰白色" },
-    { color: "#FFFFFF", name: "純白" },
-  ]
+  // const colorPalette = [
+  //   { color: "#F9E5D8", name: "柔和米色" },
+  //   { color: "#F7CAC9", name: "淡粉色" },
+  //   { color: "#B5D6E0", name: "淺藍色" },
+  //   { color: "#C9A8A9", name: "玫瑰褐色" },
+  //   { color: "#E5E0DC", name: "灰白色" },
+  //   { color: "#FFFFFF", name: "純白" },
+  // ]
 
-  const moodBoardImages = [
-    { src: "https://drive.google.com/uc?export=view&id=1pt0wYdmROVu66XgrznNKdag7E4pHtWpR", alt: "奢華護膚品" },
-    { src: "https://drive.google.com/uc?export=view&id=1FA_YOT-nvUV7ZmwvX_U9t7kKWNAMaJLH", alt: "時尚模特" },
-    { src: "https://drive.google.com/uc?export=view&id=1B7TU9a9JIew2YV0EsMTrz24-0jNFQiq3", alt: "簡約包裝" },
-    // { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/brand%20strategy%2011-V5wXbJnpsMb8tdf5DXs0lIkvWoFMpQ.jpg", alt: "護膚程序" },
-    // { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/brand%20strategy%2013-LS9lGjMgLfNuX8MFyqlLT5sSs3mbKk.jpg", alt: "自然元素" },
-    // { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/brand%20strategy%2005-JK1FiBsNrkiUMP9ENH8sW5tzNEQZZ0.jpg", alt: "NEARBY 產品" },
-    // { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/brand%20strategy%2002-v8xrsN0gzP2jHcNhEGR8xHRKG7cGjm.jpg", alt: "手部特寫" },
-    // { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/brand%20strategy%2007-71YmiySohoeUKp2ObACTygMgIOvo17.jpg", alt: "ONDO 品牌" },
-    // { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/brand%20strategy%2001-aFTMwM5Q7PWj1QTlaxVqNXzMknbNdU.jpg", alt: "krsan 產品" },
-  ]
+  // const moodBoardImages = [
+  //   { src: "https://drive.google.com/uc?export=view&id=1pt0wYdmROVu66XgrznNKdag7E4pHtWpR", alt: "奢華護膚品" },
+  //   { src: "https://drive.google.com/uc?export=view&id=1FA_YOT-nvUV7ZmwvX_U9t7kKWNAMaJLH", alt: "時尚模特" },
+  //   { src: "https://drive.google.com/uc?export=view&id=1B7TU9a9JIew2YV0EsMTrz24-0jNFQiq3", alt: "簡約包裝" },
+  // { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/brand%20strategy%2011-V5wXbJnpsMb8tdf5DXs0lIkvWoFMpQ.jpg", alt: "護膚程序" },
+  // { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/brand%20strategy%2013-LS9lGjMgLfNuX8MFyqlLT5sSs3mbKk.jpg", alt: "自然元素" },
+  // { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/brand%20strategy%2005-JK1FiBsNrkiUMP9ENH8sW5tzNEQZZ0.jpg", alt: "NEARBY 產品" },
+  // { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/brand%20strategy%2002-v8xrsN0gzP2jHcNhEGR8xHRKG7cGjm.jpg", alt: "手部特寫" },
+  // { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/brand%20strategy%2007-71YmiySohoeUKp2ObACTygMgIOvo17.jpg", alt: "ONDO 品牌" },
+  // { src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/brand%20strategy%2001-aFTMwM5Q7PWj1QTlaxVqNXzMknbNdU.jpg", alt: "krsan 產品" },
+  // ]
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const result = e.target?.result
-        if (typeof result === 'string') {
-          setUploadedImage(result)
-        }
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleScrapedData = (data) => {
-    setScrapedData(data);
+  // const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0]
+  //   if (file) {
+  //     const reader = new FileReader()
+  //     reader.onload = (e) => {
+  //       const result = e.target?.result
+  //       if (typeof result === 'string') {
+  //         setUploadedImage(result)
+  //       }
+  //     }
+  //     reader.readAsDataURL(file)
+  //   }
+  // }
+  const handleScrapedData = (data: Record<string, unknown>) => {
+    setScrapedData(data as unknown as SetStateAction<typeof scrapedData>);
 
     const transformedData: BrandStrategySection[] = Object.entries(data)
       .filter(([key]) => key !== "收益預估")
@@ -387,8 +392,8 @@ export default function BrandStrategyDashboard() {
       "社交媒體營銷策略": "📱",
       "品牌設計與視覺風格": "🎨",
       "品牌聲音與溝通口號": "🗣️",
-    };
-    return iconMap[title] || "✨"; // Default icon if not found
+    } as const;
+    return iconMap[title as keyof typeof iconMap] || "✨"; // Default icon if not found
   }
 
   const handleAnalysisComplete = () => {
@@ -549,7 +554,7 @@ export default function BrandStrategyDashboard() {
                     key={index}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedCard(index)}
+                    onClick={() => setSelectedCard(null)}
                   >
                     <Card className={`cursor-pointer transition-all duration-300 h-full ${selectedCard === index ? 'ring-2 ring-purple-500' : 'hover:shadow-md'}`}>
                       <CardHeader className="pb-2">
@@ -598,9 +603,8 @@ export default function BrandStrategyDashboard() {
                   </motion.div>
                 ))}
               </div>
-
               {/* Add Revenue Estimate Card */}
-              {scrapedData?.收益預估 && (
+              {scrapedData && scrapedData['收益預估'] && (
                 <div className="mt-8">
                   <Card className="border-none shadow-lg bg-white">
                     <CardHeader className="pb-2">
@@ -613,7 +617,7 @@ export default function BrandStrategyDashboard() {
                     </CardHeader>
                     <CardContent>
                       <p className="text-sm text-gray-600">
-                        {scrapedData.收益預估}
+                        {scrapedData['收益預估']}
                       </p>
                     </CardContent>
                   </Card>
@@ -638,7 +642,7 @@ export default function BrandStrategyDashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-sm mb-6 text-gray-600">
-              根據您的投票結果，我們將為您生成最終的品牌策略。完成後，您可以使用我們的Own & Grow服務，輕鬆地從策略過渡到產品創建、包裝設計和Shopify店鋪��置。
+              根據您的投票結果，我們將為您生成最終的品牌策略。完成後，您可以使用我們的Own & Grow服務，輕鬆���從策略過渡到產品創建、包裝設計和Shopify店鋪置。
             </p>
             <div className="flex justify-center">
               <Button
