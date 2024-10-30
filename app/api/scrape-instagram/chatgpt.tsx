@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { BrandAnalysis } from './anaylyze_ig_account';
 
 // Add this near the top of the file, after imports
