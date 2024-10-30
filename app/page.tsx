@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Instagram, Youtube, Facebook, Share2, Upload, Search, FileText, Share, Upload as UploadIcon, FileCheck } from "lucide-react"
+import { Instagram, Youtube, Facebook, Share2, Upload, Search, FileText, Share, Upload as UploadIcon, FileCheck, Menu } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
 
@@ -158,51 +158,94 @@ export default function BrandStrategyDashboard() {
   const aiGeneratorRef = useRef<HTMLDivElement>(null)
 
   // Add this near the top of the BrandStrategyDashboard component, before the return statement
-  const Header = () => (
-    <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-2">
-            <a
-              href="https://www.own-grow.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="cursor-pointer"
-            >
-              <Image
-                src="https://drive.google.com/uc?export=view&id=1X9XNqxrkSKDB1aAmR3WhLrjPai7bxNso"
-                alt="Own & Grow Logo"
-                width={120}
-                height={40}
-                className="object-contain"
-              />
-            </a>
-          </div>
-          <nav className="hidden md:flex items-center space-x-6">
-            <a
-              href="https://calendly.com/luna-own-grow/meet-with-me"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-600 hover:text-purple-600 transition-colors"
-            >
-              聯絡我們
-            </a>
+  const Header = () => {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+    return (
+      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-100">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-2">
+              <a
+                href="https://www.own-grow.com/home-tw"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer"
+              >
+                <Image
+                  src="https://drive.google.com/uc?export=view&id=1X9XNqxrkSKDB1aAmR3WhLrjPai7bxNso"
+                  alt="Own & Grow Logo"
+                  width={120}
+                  height={40}
+                  className="object-contain"
+                />
+              </a>
+            </div>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-6">
+              <a
+                href="https://calendly.com/luna-own-grow/meet-with-me"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-600 hover:text-purple-600 transition-colors"
+              >
+                聯絡我們
+              </a>
+              <Button
+                className="bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white"
+                onClick={() => {
+                  aiGeneratorRef.current?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                  })
+                }}
+              >
+                開始使用
+              </Button>
+            </nav>
+
+            {/* Mobile Menu Button */}
             <Button
-              className="bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white"
-              onClick={() => {
-                aiGeneratorRef.current?.scrollIntoView({
-                  behavior: 'smooth',
-                  block: 'center'
-                })
-              }}
+              variant="ghost"
+              className="md:hidden p-2"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              開始使用
+              <Menu className="h-8 w-8" />
             </Button>
-          </nav>
+          </div>
+
+          {/* Mobile Navigation */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden py-6 px-4 bg-white border-t border-gray-100">
+              <nav className="flex flex-col items-center space-y-6">
+                <a
+                  href="https://calendly.com/luna-own-grow/meet-with-me"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xl text-gray-800 hover:text-purple-600 transition-colors text-center"
+                >
+                  聯絡我們
+                </a>
+                <button
+                  className="w-full py-4 px-6 text-xl text-center text-white rounded-lg bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 transition-all duration-300"
+                  onClick={() => {
+                    aiGeneratorRef.current?.scrollIntoView({
+                      behavior: 'smooth',
+                      block: 'center'
+                    });
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  開始使用
+                </button>
+              </nav>
+            </div>
+          )}
         </div>
-      </div>
-    </header>
-  )
+      </header>
+    )
+  }
 
   const defaultBrandStrategySections = [
     {
@@ -232,7 +275,7 @@ export default function BrandStrategyDashboard() {
         },
         {
           title: "成熟女性市場",
-          content: "專注於35-50歲的��熟女性市場，她們重視抗衰老和高效護膚，願意投資於優質護膚品。"
+          content: "專注於35-50歲的熟女性市場，她們重視抗衰老和高效護膚，願意投資於優質護膚品。"
         },
         {
           title: "男士護膚市場",
@@ -642,7 +685,7 @@ export default function BrandStrategyDashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-sm mb-6 text-gray-600">
-              根據您的投票結果，我們將為您生成最終的品牌策略。完成後，您可以使用我們的Own & Grow服務，輕鬆���從策略過渡到產品創建、包裝設計和Shopify店鋪置。
+              根據您的投票結果，我們將為您生成最終的品牌策略。完成後，您可以使用我們的Own & Grow服務，輕鬆從策略過渡到產品創建、包裝設計和Shopify店鋪置。
             </p>
             <div className="flex justify-center">
               <Button
