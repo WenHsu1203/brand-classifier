@@ -1,37 +1,74 @@
 import { BrandAnalysis } from './anaylyze_ig_account';
 
-// Add this near the top of the file, after imports
-if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY is not defined in environment variables');
+// Cache interface
+interface CacheEntry {
+    timestamp: number;
+    data: BrandAnalysis;
 }
 
-interface InstagramPost {
-    image_url: string;
-    caption: string;
-    likes_and_comments: number;
+// Cache configuration
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const cache = new Map<string, CacheEntry>();
+
+// Add model type for type safety
+type OpenAIModel = 'gpt-4o-mini' | 'gpt-4o';
+
+// Generate a cache key based on prompt and Instagram data
+function generateCacheKey(
+    prompt: string,
+    instagramData: {
+        followers: number;
+        bio: string;
+        posts: Array<{
+            likes_and_comments: number;
+            caption: string;
+            image_url: string;
+        }>;
+    },
+    model: OpenAIModel
+): string {
+    const dataFingerprint = {
+        followers: instagramData.followers,
+        bio: instagramData.bio,
+        postsCount: instagramData.posts.length,
+        totalEngagement: instagramData.posts.reduce((sum, post) => sum + post.likes_and_comments, 0),
+    };
+    return `${model}_${prompt}_${JSON.stringify(dataFingerprint)}`;
 }
 
-interface InstagramData {
-    followers: number;
-    bio: string;
-    posts: InstagramPost[];
+// Check if cache entry is valid
+function isCacheValid(entry: CacheEntry): boolean {
+    const now = Date.now();
+    return now - entry.timestamp < CACHE_DURATION;
 }
 
 async function generateChatGPTResponse(
     prompt: string,
-    instagramData: InstagramData
+    instagramData: {
+        followers: number;
+        bio: string;
+        posts: Array<{
+            likes_and_comments: number;
+            caption: string;
+            image_url: string;
+        }>;
+    },
+    model: OpenAIModel = 'gpt-4o-mini' // Default model
 ): Promise<BrandAnalysis> {
     try {
-        // Add debug logging
-        console.log('API Key exists:', !!process.env.OPENAI_API_KEY);
+        // Generate cache key
+        const cacheKey = generateCacheKey(prompt, instagramData, model);
 
-        // Remove or simplify the contextMessage since we're providing the data in messages
-        const fullPrompt = prompt; // Just use the original prompt
+        // Check cache
+        const cachedEntry = cache.get(cacheKey);
+        if (cachedEntry && isCacheValid(cachedEntry)) {
+            console.log('Using cached response');
+            return cachedEntry.data;
+        }
 
-        // Start timer
+        console.log(`Making new API call with model: ${model}`);
         const apiStartTime = performance.now();
 
-        // Make API call to ChatGPT (you'll need to implement this based on your API setup)
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -39,7 +76,7 @@ async function generateChatGPTResponse(
                 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
             },
             body: JSON.stringify({
-                model: 'gpt-4o-mini', // or your preferred model
+                model, // Use the provided model
                 messages: [
                     {
                         role: 'system',
@@ -49,14 +86,14 @@ async function generateChatGPTResponse(
                         role: 'user',
                         content: `Analyzing Instagram account with ${instagramData.followers} followers. Bio: ${instagramData.bio}`
                     },
-                    ...instagramData.posts.map(post => ({
+                    ...instagramData.posts.map((post: { image_url: any; likes_and_comments: any; caption: any; }) => ({
                         role: 'user',
                         content: [
                             {
                                 type: "image_url",
                                 image_url: {
                                     url: post.image_url,
-                                    detail: "low"  // Can be "low", "high", or "auto"
+                                    detail: "low"
                                 }
                             },
                             {
@@ -67,36 +104,34 @@ async function generateChatGPTResponse(
                     })),
                     {
                         role: 'user',
-                        content: fullPrompt,
+                        content: prompt,
                     },
                 ],
                 temperature: 0.7,
                 max_tokens: 10000,
                 response_format: { type: "json_object" },
-            }),
+            }), 
         });
 
         const data = await response.json();
-
-        // End timer and log duration
         const apiEndTime = performance.now();
         console.log(`OpenAI API call took ${((apiEndTime - apiStartTime) / 1000).toFixed(2)} seconds`);
 
-        // Add error handling for API response
         if (!response.ok) {
             throw new Error(`OpenAI API error: ${data.error?.message || 'Unknown error'}`);
         }
 
-        // Check if we have a valid response with choices
         if (!data.choices || !data.choices.length || !data.choices[0].message) {
             throw new Error('Invalid response format from OpenAI API');
         }
-        console.log(data);
 
-        // Parse the JSON string into an object
+        // Parse and cache the response
         const analysisContent = JSON.parse(data.choices[0].message.content);
+        cache.set(cacheKey, {
+            timestamp: Date.now(),
+            data: analysisContent
+        });
 
-        // Return the parsed content as BrandAnalysis
         return analysisContent as BrandAnalysis;
 
     } catch (error) {
@@ -104,5 +139,18 @@ async function generateChatGPTResponse(
         throw error;
     }
 }
+
+// Optional: Clean up expired cache entries periodically
+function cleanupCache() {
+    // Convert cache entries to array before iterating
+    Array.from(cache.entries()).forEach(([key, entry]) => {
+        if (!isCacheValid(entry)) {
+            cache.delete(key);
+        }
+    });
+}
+
+// Run cleanup every hour
+setInterval(cleanupCache, 60 * 60 * 1000);
 
 export default generateChatGPTResponse; 

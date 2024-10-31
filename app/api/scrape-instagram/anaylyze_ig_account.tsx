@@ -48,6 +48,160 @@ export interface BrandAnalysis {
     收益預估: RevenueEstimation[];
 }
 
+const stylePrompt = `
+請根據此網紅的 Instagram 照片與文章內容、followers count、bio、like+comment 的總和, 分析此IG帳號的風格與定位,
+若網紅的風格明確屬於某國家風格，請標明該國家的風格（如：歐美、韓國、日系）。回覆JSON格式:
+{
+  "個人風格分析": [
+    {
+      "風格特徵": "描述該風格的主要特徵。",
+      "風格影響": "分析此風格適合建立怎麼樣的品牌形象。",
+      "潛在價值": "闡述該風格如何吸引特定消費者的注意。"
+    },
+    ...
+  ]
+}
+請確保三個個人風格分析，每個包括標題與20-30字的內容。
+`;
+
+const targetPrompt = `
+分析此IG帳號的風格與定位，回覆JSON格式：:
+{
+  "目標受眾洞察": [
+    {
+      "消費者輪廓": "分析受眾的年齡層、性別、興趣、生活型態。",
+      "消費者行為": "結合行銷心理學進行深入分析。",
+      "產品需求": "評估品牌潛在的保養美妝需求。"
+    },
+    ...
+  ]
+}
+請確保三個目標受眾洞察，每個包括標題與20-30字的內容。
+`;
+
+const brandPrompt = `
+分析此IG帳號的品牌定位分析，回覆JSON格式：:
+{
+  "品牌定位分析": [
+    {
+      "市場定位": "描述品牌的市場定位（如高端、平價）。",
+      "差異化優勢": "提出品牌在市場中的差異化策略。",
+      "競爭優勢": "分析品牌如何在同類產品中脫穎而出。"
+    },
+    ...
+  ],
+}
+請確保三個品牌定位分析，每個包括標題與20-30字的內容。
+`
+
+const productLinePrompt = `
+分析此IG帳號的產品線建議，回覆JSON格式：:
+{
+  "產品線建議": [
+    {
+      "產品建議": "根據目標受眾需求，提出具體的產品建議。",
+      "核心需求": "建議可以推出的產品類型。",
+      "市場趨勢": "強調符合市場趨勢的產品創新建議。"
+    },
+    ...
+  ],
+}
+請確保三個產品線建議，每個包括標題與20-30字的內容。
+`
+
+const coreValuePrompt = `
+分析此IG帳號的品牌故事與價值觀，回覆JSON格式：:
+{
+  "品牌故事與價值觀": [
+    {
+      "品牌故事": "建議品牌的故事核心，並說明如何與消費者建立情感聯繫。",
+      "核心價值觀": "提供品牌最重要的價值觀。",
+      "情感共鳴": "解釋這些故事和價值觀如何與受眾產生共鳴。"
+    },
+    ...
+  ],
+}
+請確保三個品牌故事與價值觀，每個包括標題與20-30字的內容。
+`
+
+const socialMediaPrompt = `
+分析此IG帳號的社交媒體營銷策略，回覆JSON格式：:
+{
+  "社交媒體營銷策略": [
+    {
+      "營銷策略": "提供具體的社交媒體策略以增加品牌曝光。",
+      "KOL合作": "建議如何通過合作KOL來提升品牌影響力。",
+      "轉化策略": "分析如何有效將粉絲轉化為顧客。"
+    },
+    ...
+  ],
+}
+請確保三個社交媒體營銷策略，每個包括標題與20-30字的內容。
+`
+
+const brandDesignPrompt = `
+分析此IG帳號的品牌設計與視覺風格，回覆JSON格式：:
+{
+  "品牌設計與視覺風格": [
+    {
+      "視覺設計建議": "根據帳號風格，提出適合的品牌視覺設計建議。",
+      "設計元素": "描述具體的設計元素（如色彩、字體）及其影響。",
+      "品牌識別": "強調視覺風格如何提升品牌識別度。"
+    },
+    ...
+  ],
+}
+請確保三個品牌設計與視覺風格，每個包括標題與20-30字的內容。
+`
+
+const brandVoicePrompt = `
+分析此IG帳號的品牌聲音與溝通口號，回覆JSON格式：:
+{
+  "品牌聲音與溝通口號": [
+    {
+        "品牌聲音": "提供適合品牌的聲音和溝通方式建議。",
+        "溝通口號": "建議簡短且具影響力的品牌口號。",
+        "情感聯繫": "說明品牌聲音如何增強品牌與消費者的情感聯繫。"
+    },
+    ...
+  ],
+}
+請確保三個品牌聲音與溝通口號，每個包括標題與20-30字的內容。
+`
+
+const revenuePrompt = `
+分析此IG帳號的收益預估，請根據其日常 Instagram 貼文的互動率(engagement)進行分析他如果開始販售的話的報酬預估，回覆JSON格式：:
+{
+  "收益預估":[ {
+    "互動量計算": {
+    "總互動數": {
+      "公式": "總喜歡數 + 總評論數",
+      "計算結果": 計算結果
+    },
+    "平均每篇互動率": {
+      "公式": "總互動數 ÷ 9 ÷ 追蹤者數量",
+      "計算結果": 計算結果
+    }
+  },
+  "銷售量預估分析": {
+    "每月潛在銷售量計算": {
+      "公式": "總互動數 ÷ 9 × 假設下單率 20%",
+      "計算結果": 計算結果
+    },
+    "平均客單價": {
+      "假設平均客單價": 1200
+    }
+  },
+  "潛在每月收益": {
+    "收益預估": {
+      "公式": "每月潛在銷售量 × 平均客單價",
+      "計算結果": 計算結果,
+      }
+    }
+  }]
+}
+`
+
 const prompt = `
 請根據此網紅的 Instagram 照片與文章內容、followers count、bio、like+comment 的總和，為其制定一份品牌策略報告，針對第1到8項目提供三個有深度的策略方向幫助他去發想他的方向。此報告的受眾是該網紅，報告內容應協助他理解如何創立個人保養品牌。若網紅的風格明確屬於某國家風格，請標明該國家的風格（如：歐美、韓國、日系）。
 在收益預估部分，請根據其日常 Instagram 貼文的互動率(engagement)進行分析他如果開始販售的話的報酬預估。請以如下格式輸出：
@@ -198,7 +352,7 @@ const dummyBrandAnalysis: BrandAnalysis = {
         {
             strategy: "策略方向二",
             洞察特徵: "2.主要面向年輕女性，對時尚和美容有較高追求。",
-            洞察影響: "2.強化品牌在年輕女性市場的影響力",
+            洞察影響: "2.強化品牌���年輕女性市場的影響力",
             潛在價值: "2.吸引尋求時尚美容產品的消費者"
         },
         {
@@ -362,21 +516,51 @@ export async function InstagramAnalysis(igUsername: string): Promise<BrandAnalys
                 }))
         };
 
-        //     // Example prompt - you can modify this
-        //     // Generate ChatGPT response
-        const analysis = await generateChatGPTResponse(prompt, {
-            followers: transformedData.followers,
-            bio: transformedData.bio,
-            posts: transformedData.posts.map((post: { image_url: any; likes_and_comments: any; }) => ({
-                ...post,
-                image_url: post.image_url || '',
-                likes_and_comments: post.likes_and_comments || 0
-            }))
-        });
+        // Run all prompts in parallel
+        const {
+            個人風格分析,
+            目標受眾洞察,
+            品牌定位分析,
+            產品線建議,
+            品牌故事與價值觀,
+            社交媒體營銷策略,
+            品牌設計與視覺風格,
+            品牌聲音與溝通口號,
+            收益預估
+        } = await Promise.all([
+            generateChatGPTResponse(stylePrompt, transformedData, 'gpt-4o-mini')
+                .then(res => ({ 個人風格分析: res.個人風格分析 })),
+            generateChatGPTResponse(targetPrompt, transformedData, 'gpt-4o-mini')
+                .then(res => ({ 目標受眾洞察: res.目標受眾洞察 })),
+            generateChatGPTResponse(brandPrompt, transformedData, 'gpt-4o-mini')
+                .then(res => ({ 品牌定位分析: res.品牌定位分析 })),
+            generateChatGPTResponse(productLinePrompt, transformedData, 'gpt-4o-mini')
+                .then(res => ({ 產品線建議: res.產品線建議 })),
+            generateChatGPTResponse(coreValuePrompt, transformedData, 'gpt-4o-mini')
+                .then(res => ({ 品牌故事與價值觀: res.品牌故事與價值觀 })),
+            generateChatGPTResponse(socialMediaPrompt, transformedData, 'gpt-4o-mini')
+                .then(res => ({ 社交媒體營銷策略: res.社交媒體營銷策略 })),
+            generateChatGPTResponse(brandDesignPrompt, transformedData, 'gpt-4o-mini')
+                .then(res => ({ 品牌設計與視覺風格: res.品牌設計與視覺風格 })),
+            generateChatGPTResponse(brandVoicePrompt, transformedData, 'gpt-4o-mini')
+                .then(res => ({ 品牌聲音與溝通口號: res.品牌聲音與溝通口號 })),
+            generateChatGPTResponse(revenuePrompt, transformedData, 'gpt-4o')
+                .then(res => ({ 收益預估: res.收益預估 }))
+        ]).then(results => Object.assign({}, ...results));
 
         const endTime = performance.now();
         console.log(`Instagram analysis took ${((endTime - startTime) / 1000).toFixed(2)} seconds`);
-        return analysis as unknown as BrandAnalysis;
+        return {
+            個人風格分析,
+            目標受眾洞察,
+            品牌定位分析,
+            產品線建議,
+            品牌故事與價值觀,
+            社交媒體營銷策略,
+            品牌設計與視覺風格,
+            品牌聲音與溝通口號,
+            收益預估
+        } as BrandAnalysis;
 
     } catch (error) {
         const endTime = performance.now();

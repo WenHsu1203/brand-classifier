@@ -17,7 +17,7 @@ export const getAccountInfo = async (params: AccountInfoParams, igUsername: stri
    */
   
   const endpointParams: Record<string, string> = {
-    fields: `business_discovery.username(${igUsername}){username,website,name,ig_id,id,profile_picture_url,biography,follows_count,followers_count,media_count,media{id,caption,media_type,media_url,thumbnail_url,comments_count,like_count}}`,
+    fields: `business_discovery.username(${igUsername}){biography,followers_count,media{caption,media_type,media_url,thumbnail_url,comments_count,like_count}}`,
     access_token: params.access_token
   };
 
