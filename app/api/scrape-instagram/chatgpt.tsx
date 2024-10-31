@@ -99,7 +99,7 @@ async function generateChatGPTResponse(
                 model,
                 messages,
                 temperature: 0.7,
-                max_tokens: 10000,
+                max_tokens: 2000,
                 response_format: { type: "json_object" },
             }), 
         });

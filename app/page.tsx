@@ -98,7 +98,7 @@ const InstagramScraper = ({ onDataReceived, onComplete }: {
         <div className="flex flex-col sm:flex-row gap-4 items-center"> {/* Added max-w-xl to container */}
           <Input
             className="w-[300px] border-2 border-purple-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg py-6"
-            placeholder="@heyitsmindyy"
+            placeholder="@iamqhsin"
             type="text"
             value={account}
             onChange={(e) => setAccount(e.target.value)}
