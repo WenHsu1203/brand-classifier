@@ -462,73 +462,208 @@ export default function BrandStrategyDashboard() {
               <p className="text-sm mb-6 text-gray-600">
                 基於對您最9篇Instagram帖子的AI分析，我們為您量身定制了個性化的護膚品牌策略。以下是您的品牌策略概覽，包括品牌定位、目標受眾分析、產品線建議等。這個策略將幫助您輕鬆構想和發展您的個人護膚品牌。請為每個部分選擇您喜歡的選項，並分享給您的粉絲進行投票。
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {brandStrategySections.map((section, index) => (
-                  <motion.div
-                    key={index}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedCard(null)}
-                  >
-                    <Card className={`cursor-pointer transition-all duration-300 h-full ${selectedCard === index ? 'ring-2 ring-purple-500' : 'hover:shadow-md'}`}>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-lg font-semibold flex items-center justify-between">
-                          <span className="flex items-center">
-                            <span className="text-2xl mr-2">{section.icon}</span>
-                            {section.title}
-                          </span>
-                          {/* <Button variant="outline" size="sm" className="ml-2">
-                            <Share2 className="h-4 w-4 mr-2" />
-                            分享
-                          </Button> */}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <Tabs defaultValue="option-1" className="w-full">
-                          <TabsList className="grid w-full grid-cols-3">
-                            {section.options.map((_, optionIndex) => (
-                              <TabsTrigger
+              {/* First section */}
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-purple-600 mb-4">第一步：分析</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {brandStrategySections.filter(section => ['個人風格分析', '目標受眾洞察'].includes(section.title)).map((section, index) => (
+                    <motion.div
+                      key={index}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSelectedCard(null)}
+                    >
+                      <Card className={`cursor-pointer transition-all duration-300 h-full ${selectedCard === index ? 'ring-2 ring-purple-500' : 'hover:shadow-md'}`}>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg font-semibold flex items-center justify-between">
+                            <span className="flex items-center">
+                              <span className="text-2xl mr-2">{section.icon}</span>
+                              {section.title}
+                            </span>
+                            {/* <Button variant="outline" size="sm" className="ml-2">
+                              <Share2 className="h-4 w-4 mr-2" />
+                              分享
+                            </Button> */}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <Tabs defaultValue="option-1" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3">
+                              {section.options.map((_, optionIndex) => (
+                                <TabsTrigger
+                                  key={optionIndex}
+                                  value={`option-${optionIndex + 1}`}
+                                >
+                                  策略 {optionIndex + 1}
+                                </TabsTrigger>
+                              ))}
+                            </TabsList>
+                            {section.options.map((option, optionIndex) => (
+                              <TabsContent
                                 key={optionIndex}
                                 value={`option-${optionIndex + 1}`}
+                                className="mt-4"
                               >
-                                策略 {optionIndex + 1}
-                              </TabsTrigger>
-                            ))}
-                          </TabsList>
-                          {section.options.map((option, optionIndex) => (
-                            <TabsContent
-                              key={optionIndex}
-                              value={`option-${optionIndex + 1}`}
-                              className="mt-4"
-                            >
-                              <div className="space-y-2">
-                                {Object.entries(option).map(([key, value]) => {
-                                  // Skip the 'strategy' key since we don't want to display it
-                                  if (key === 'strategy') return null;
+                                <div className="space-y-2">
+                                  {Object.entries(option).map(([key, value]) => {
+                                    // Skip the 'strategy' key since we don't want to display it
+                                    if (key === 'strategy') return null;
 
-                                  return (
-                                    <div key={key} className="mb-4">
-                                      <h4 className="font-semibold text-base text-gray-800">
-                                        {key}:
-                                      </h4>
-                                      <p className="text-sm text-gray-600">
-                                        {value}
-                                      </p>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </TabsContent>
-                          ))}
-                        </Tabs>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
+                                    return (
+                                      <div key={key} className="mb-4">
+                                        <h4 className="font-semibold text-base text-gray-800">
+                                          {key}:
+                                        </h4>
+                                        <p className="text-sm text-gray-600">
+                                          {value}
+                                        </p>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </TabsContent>
+                            ))}
+                          </Tabs>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
-              {/* Add Revenue Estimate Card */}
-              {scrapedData && scrapedData['收益預估'] && (
-                <div className="mt-8 max-w-2xl mx-auto">
+              {/* Second section */}
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-purple-600 mb-4">第二步：定位</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {brandStrategySections.filter(section => ['品牌定位'].includes(section.title)).map((section, index) => (
+                    <motion.div
+                      key={index}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSelectedCard(null)}
+                    >
+                      <Card className={`cursor-pointer transition-all duration-300 h-full ${selectedCard === index ? 'ring-2 ring-purple-500' : 'hover:shadow-md'}`}>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg font-semibold flex items-center justify-between">
+                            <span className="flex items-center">
+                              <span className="text-2xl mr-2">{section.icon}</span>
+                              {section.title}
+                            </span>
+                            {/* <Button variant="outline" size="sm" className="ml-2">
+                              <Share2 className="h-4 w-4 mr-2" />
+                              分享
+                            </Button> */}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <Tabs defaultValue="option-1" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3">
+                              {section.options.map((_, optionIndex) => (
+                                <TabsTrigger
+                                  key={optionIndex}
+                                  value={`option-${optionIndex + 1}`}
+                                >
+                                  策略 {optionIndex + 1}
+                                </TabsTrigger>
+                              ))}
+                            </TabsList>
+                            {section.options.map((option, optionIndex) => (
+                              <TabsContent
+                                key={optionIndex}
+                                value={`option-${optionIndex + 1}`}
+                                className="mt-4"
+                              >
+                                <div className="space-y-2">
+                                  {Object.entries(option).map(([key, value]) => {
+                                    // Skip the 'strategy' key since we don't want to display it
+                                    if (key === 'strategy') return null;
+
+                                    return (
+                                      <div key={key} className="mb-4">
+                                        <h4 className="font-semibold text-base text-gray-800">
+                                          {key}:
+                                        </h4>
+                                        <p className="text-sm text-gray-600">
+                                          {value}
+                                        </p>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </TabsContent>
+                            ))}
+                          </Tabs>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+              {/* Third section */}
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-purple-600 mb-4">第三步：發想</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {brandStrategySections.filter(section => ['產品策略', '品牌核心理念', '行銷規劃', '品牌聲音', '品牌形象風格'].includes(section.title)).map((section, index) => (
+                    <motion.div
+                      key={index}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setSelectedCard(null)}
+                    >
+                      <Card className={`cursor-pointer transition-all duration-300 h-full ${selectedCard === index ? 'ring-2 ring-purple-500' : 'hover:shadow-md'}`}>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-lg font-semibold flex items-center justify-between">
+                            <span className="flex items-center">
+                              <span className="text-2xl mr-2">{section.icon}</span>
+                              {section.title}
+                            </span>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <Tabs defaultValue="option-1" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3">
+                              {section.options.map((_, optionIndex) => (
+                                <TabsTrigger
+                                  key={optionIndex}
+                                  value={`option-${optionIndex + 1}`}
+                                >
+                                  策略 {optionIndex + 1}
+                                </TabsTrigger>
+                              ))}
+                            </TabsList>
+                            {section.options.map((option, optionIndex) => (
+                              <TabsContent
+                                key={optionIndex}
+                                value={`option-${optionIndex + 1}`}
+                                className="mt-4"
+                              >
+                                <div className="space-y-2">
+                                  {Object.entries(option).map(([key, value]) => {
+                                    if (key === 'strategy') return null;
+                                    return (
+                                      <div key={key} className="mb-4">
+                                        <h4 className="font-semibold text-base text-gray-800">
+                                          {key}
+                                        </h4>
+                                        <p className="text-sm text-gray-600">
+                                          {value}
+                                        </p>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </TabsContent>
+                            ))}
+                          </Tabs>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+              {/* Fourth section */}
+              <div className="mb-8">
+                <h2 className="text-xl font-bold text-purple-600 mb-4">第四步：收益預估</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Card className="border-none shadow-lg bg-white">
                     <CardHeader>
                       <div className="flex items-center justify-between">
@@ -599,6 +734,7 @@ export default function BrandStrategyDashboard() {
                             </div>
                           </div>
                         </StepSummary>
+
                         <StepSummary
                           step={4}
                           title="平均客單價"
@@ -631,7 +767,7 @@ export default function BrandStrategyDashboard() {
                     </CardContent>
                   </Card>
                 </div>
-              )}
+              </div>
             </CardContent>
           </Card>
         </motion.div>
@@ -651,7 +787,7 @@ export default function BrandStrategyDashboard() {
           </CardHeader>
           <CardContent>
             <p className="text-sm mb-6 text-gray-600">
-              根據您的投票結果，我們將為您生成最終的品牌策略。完成後，您可以使用我們的Own & Grow服務，輕鬆從策略過渡到產品創建、包裝設計和Shopify店鋪置。
+              根據您的投票結果，我們將為您生成最終的品牌策略。完成後，您可以使用我們的Own & Grow服務，輕鬆從策略過渡到產品創建、包裝設計和Shopify店鋪。
             </p>
             <div className="flex justify-center">
               <Button
