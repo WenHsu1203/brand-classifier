@@ -572,7 +572,7 @@ export default function BrandStrategyDashboard() {
                             <div className="bg-gray-50 p-3 rounded-lg text-sm">
                               <div className="flex justify-between items-center">
                                 <span className="text-gray-600">計算公式:</span>
-                                <span>{"總互動數 ÷ 9 ÷ 追蹤者數量"}</span>
+                                <span>{"總互動數 ÷ 貼文數 ÷ 追蹤者數量"}</span>
                               </div>
                             </div>
                           </div>
