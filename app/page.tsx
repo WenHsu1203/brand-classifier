@@ -676,7 +676,7 @@ export default function BrandStrategyDashboard() {
                             <div className="flex justify-between items-center mb-2">
                               <span className="text-sm text-gray-600">公式:</span>
                               <span className="text-sm text-gray-800">
-                                {'總查看數 + 總評論數'}
+                                {'總喜歡數 + 總評論數'}
                               </span>
                             </div>
                             <div className="flex justify-between items-center">
@@ -695,7 +695,7 @@ export default function BrandStrategyDashboard() {
                             <div className="flex justify-between items-center mb-2">
                               <span className="text-sm text-gray-600">公式:</span>
                               <span className="text-sm text-gray-800">
-                                {'總互動數 ÷ 9 + 追蹤者數量'}
+                                {'總互動數 ÷ 9 ÷ 追蹤者數量'}
                               </span>
                             </div>
                             <div className="flex justify-between items-center">
