@@ -582,14 +582,14 @@ export default function BrandStrategyDashboard() {
                           step={3}
                           title="每月潛在銷售量"
                           result={Number(scrapedData['收益預估'][0]['銷售量預估分析']['每月潛在銷售量計算']['計算結果']).toLocaleString('en-US')}
-                          formula="平均每篇貼文互動數 × 假設互動率 20%"
+                          formula="平均每篇貼文互動數 × 假設互動率 5%"
                         >
                           <div className="space-y-2">
-                            <p className="text-sm text-gray-600">估算每月可能的銷售量，假設 20% 的互動轉化率。</p>
+                            <p className="text-sm text-gray-600">估算每月可能的銷售量，假設 5% 的互動轉化率。</p>
                             <div className="bg-gray-50 p-3 rounded-lg text-sm">
                               <div className="flex justify-between items-center">
                                 <span className="text-gray-600">計算公式:</span>
-                                <span>{"平均每篇貼文互動數 × 假設互動率 20%"}</span>
+                                <span>{"平均每篇貼文互動數 × 假設下單率 5%"}</span>
                               </div>
                             </div>
                           </div>
