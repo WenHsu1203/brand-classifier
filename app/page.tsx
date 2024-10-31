@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useRef, SetStateAction } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Instagram, Youtube, Facebook, Share2, Upload, Search, FileText, Share, Upload as UploadIcon, FileCheck, Menu } from "lucide-react"
+import { Instagram, Youtube, Facebook, Share2, Upload, Search, FileText, Share, Upload as UploadIcon, FileCheck, Menu, ChevronUp, ChevronDown } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
 
@@ -659,109 +659,98 @@ export default function BrandStrategyDashboard() {
               {scrapedData && scrapedData['收益預估'] && (
                 <div className="mt-8">
                   <Card className="border-none shadow-lg bg-white">
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg font-semibold flex items-center">
-                        <span className="flex items-center">
-                          <span className="text-2xl mr-2">💰</span>
-                          收益預估
-                        </span>
-                      </CardTitle>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">💰</span>
+                          <CardTitle className="text-xl font-semibold">收益預估</CardTitle>
+                        </div>
+                        <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-orange-500">
+                          {"NTD " + Number(scrapedData['收益預估'][0]['潛在每月收益']['收益預估']['計算結果']).toLocaleString('en-US') || 'NTD 0'}
+                        </div>
+                      </div>
+                      <CardDescription>每月潛在收益</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-6">
-                        {/* 互動量計算 Section */}
-                        <div>
-                          <h3 className="text-md font-semibold mb-3">互動量計算</h3>
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-sm text-gray-600">公式:</span>
-                              <span className="text-sm text-gray-800">
-                                {'總喜歡數 + 總評論數'}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">計算結果:</span>
-                              <span className="text-sm font-semibold text-gray-800">
-                                {scrapedData['收益預估'][0]['互動量計算']['總互動數']['計算結果'] || '0'}
-                              </span>
+                      <div className="grid gap-2">
+                        <StepSummary
+                          step={1}
+                          title="互動量計算"
+                          result={Number(scrapedData['收益預估'][0]['互動量計算']['總互動數']['計算結果']).toLocaleString('en-US')}
+                          formula="總喜歡數 + 總評論數"
+                        >
+                          <div className="space-y-2">
+                            <p className="text-sm text-gray-600">計算所有貼文的總互動量，評估內容的整體影響力。</p>
+                            <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600">計算公式:</span>
+                                <span>{scrapedData['收益預估'][0]['互動量計算']['總互動數']['公式']}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </StepSummary>
 
-                        {/* 平均每篇互動率 Section */}
-                        <div>
-                          <h3 className="text-md font-semibold mb-3">平均每篇互動率</h3>
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-sm text-gray-600">公式:</span>
-                              <span className="text-sm text-gray-800">
-                                {'總互動數 ÷ 9 ÷ 追蹤者數量'}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">計算結果:</span>
-                              <span className="text-sm font-semibold text-gray-800">
-                                {scrapedData['收益預估'][0]['互動量計算']['平均每篇互動率']['計算結果'] || '0%'}
-                              </span>
+                        <StepSummary
+                          step={2}
+                          title="平均每篇互動率"
+                          result={Number(scrapedData['收益預估'][0]['互動量計算']['平均每篇互動率']['計算結果']).toLocaleString('en-US')}
+                          formula="總互動數 ÷ 9 ÷ 追蹤者數量"
+                        >
+                          <div className="space-y-2">
+                            <p className="text-sm text-gray-600">計算平均每篇內容的互動率，評估內容的吸引力。</p>
+                            <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600">計算公式:</span>
+                                <span>{scrapedData['收益預估'][0]['互動量計算']['平均每篇互動率']['公式']}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </StepSummary>
 
-                        {/* 銷售量預估分析 Section */}
-                        <div>
-                          <h3 className="text-md font-semibold mb-3">每月潛在銷售量計算</h3>
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-sm text-gray-600">公式:</span>
-                              <span className="text-sm text-gray-800">
-                                {'平均每篇點文互動數 × 假設互動率 20%'}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">計算結果:</span>
-                              <span className="text-sm font-semibold text-gray-800">
-                                {scrapedData['收益預估'][0]['銷售量預估分析']['每月潛在銷售量計算']['計算結果'] || '0'}
-                              </span>
+                        <StepSummary
+                          step={3}
+                          title="每月潛在銷售量"
+                          result={Number(scrapedData['收益預估'][0]['銷售量預估分析']['每月潛在銷售量計算']['計算結果']).toLocaleString('en-US')}
+                          formula="平均每篇貼文互動數 × 假設互動率 20%"
+                        >
+                          <div className="space-y-2">
+                            <p className="text-sm text-gray-600">估算每月可能的銷售量，假設 20% 的互動轉化率。</p>
+                            <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600">計算公式:</span>
+                                <span>{scrapedData['收益預估'][0]['銷售量預估分析']['每月潛在銷售量計算']['公式']}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </StepSummary>
 
-                        {/* 平均客單價 Section */}
-                        <div>
-                          <h3 className="text-md font-semibold mb-3">平均客單價</h3>
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-600">假設平均售價:</span>
-                              <span className="text-sm font-semibold text-gray-800">
-                                {scrapedData['收益預估'][0]['銷售量預估分析']['平均客單價']['假設平均客單價'] || 'NTD 0'}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                        <StepSummary
+                          step={4}
+                          title="平均客單價"
+                          result={Number(scrapedData['收益預估'][0]['銷售量預估分析']['平均客單價']['假設平均客單價']).toLocaleString('en-US')}
+                        >
+                          <p className="text-sm text-gray-600">假設的平均每筆交易金額，基於市場調研及產品定位。</p>
+                        </StepSummary>
 
-                        {/* 潛在每月收益 Section */}
-                        <div>
-                          <h3 className="text-md font-semibold mb-3">潛在每月收益</h3>
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-sm text-gray-600">公式:</span>
-                              <span className="text-sm text-gray-800">
-                                {'每月潛在銷售量 × 平均客單價'}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-sm text-gray-600">計算結果:</span>
-                              <span className="text-sm font-semibold text-gray-800">
-                                {scrapedData['收益預估'][0]['潛在每月收益']['收益預估']['計算結果'] || 'NTD 0'}
-                              </span>
-                            </div>
-                            <div className="mt-2">
-                              <span className="text-xs text-gray-500">
-                                說明: {'此收益預估基於當前互動數據及假設的轉換率，幫助理解潛在的市場收益'}
-                              </span>
+                        <StepSummary
+                          step={5}
+                          title="潛在每月收益"
+                          result={"NTD " + Number(scrapedData['收益預估'][0]['潛在每月收益']['收益預估']['計算結果']).toLocaleString('en-US')}
+                          formula="每月潛在銷售量 × 平均客單價"
+                        >
+                          <div className="space-y-2">
+                            <p className="text-sm text-gray-600">最終的每月預估收益，基於潛在銷售量和平均客單價。</p>
+                            <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600">計算公式:</span>
+                                <span>{scrapedData['收益預估'][0]['潛在每月收益']['收益預估']['公式']}</span>
+                              </div>
+                              <div className="mt-2 text-xs text-gray-500">
+                                {"此收益預估基於當前互動數據及假設的轉換率，幫助理解潛在的市場收益"}
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        </StepSummary>
                       </div>
                     </CardContent>
                   </Card>
@@ -931,6 +920,37 @@ export default function BrandStrategyDashboard() {
         transition={{ duration: 0.5, delay: 0.8 }}
       > */}
 
+}
+
+// Add this component at the bottom of your file
+function StepSummary({ step, title, result, formula, children }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="border rounded-lg overflow-hidden bg-white">
+      <Button
+        variant="ghost"
+        className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-r from-purple-600 to-orange-500 text-white font-bold text-xs">
+            {step}
+          </div>
+          <span className="font-medium">{title}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-semibold">{result}</span>
+          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </div>
+      </Button>
+      {isExpanded && (
+        <div className="p-4 border-t bg-gray-50/50">
+          {children}
+        </div>
+      )}
+    </div>
+  )
 }
 
 
