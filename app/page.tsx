@@ -631,12 +631,21 @@ export default function BrandStrategyDashboard() {
                               className="mt-4"
                             >
                               <div className="space-y-2">
-                                <h4 className="font-semibold text-base">
-                                  {option.title}
-                                </h4>
-                                <p className="text-sm text-gray-600">
-                                  {option.content}
-                                </p>
+                                {Object.entries(option).map(([key, value]) => {
+                                  // Skip the 'strategy' key since we don't want to display it
+                                  if (key === 'strategy') return null;
+                                  
+                                  return (
+                                    <div key={key} className="mb-4">
+                                      <h4 className="font-semibold text-base text-gray-800">
+                                        {key}:
+                                      </h4>
+                                      <p className="text-sm text-gray-600">
+                                        {value}
+                                      </p>
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </TabsContent>
                           ))}
@@ -659,9 +668,101 @@ export default function BrandStrategyDashboard() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-sm text-gray-600">
-                        {scrapedData['收益預估']}
-                      </p>
+                      <div className="space-y-6">
+                        {/* 互動量計算 Section */}
+                        <div>
+                          <h3 className="text-md font-semibold mb-3">互動量計算</h3>
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm text-gray-600">公式:</span>
+                              <span className="text-sm text-gray-800">
+                                {'總查看數 + 總評論數'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">計算結果:</span>
+                              <span className="text-sm font-semibold text-gray-800">
+                                {scrapedData['收益預估'][0]['互動量計算']['總互動數']['計算結果'] || '0'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 平均每篇互動率 Section */}
+                        <div>
+                          <h3 className="text-md font-semibold mb-3">平均每篇互動率</h3>
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm text-gray-600">公式:</span>
+                              <span className="text-sm text-gray-800">
+                                {'總互動數 ÷ 9 + 追蹤者數量'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">計算結果:</span>
+                              <span className="text-sm font-semibold text-gray-800">
+                                {scrapedData['收益預估'][0]['互動量計算']['平均每篇互動率']['計算結果'] || '0%'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 銷售量預估分析 Section */}
+                        <div>
+                          <h3 className="text-md font-semibold mb-3">每月潛在銷售量計算</h3>
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm text-gray-600">公式:</span>
+                              <span className="text-sm text-gray-800">
+                                {'平均每篇點文互動數 × 假設互動率 20%'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">計算結果:</span>
+                              <span className="text-sm font-semibold text-gray-800">
+                                {scrapedData['收益預估'][0]['銷售量預估分析']['每月潛在銷售量計算']['計算結果'] || '0'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 平均客單價 Section */}
+                        <div>
+                          <h3 className="text-md font-semibold mb-3">平均客單價</h3>
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">假設平均售價:</span>
+                              <span className="text-sm font-semibold text-gray-800">
+                                {scrapedData['收益預估'][0]['銷售量預估分析']['平均客單價']['假設平均客單價'] || 'NTD 0'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 潛在每月收益 Section */}
+                        <div>
+                          <h3 className="text-md font-semibold mb-3">潛在每月收益</h3>
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm text-gray-600">公式:</span>
+                              <span className="text-sm text-gray-800">
+                                {'每月潛在銷售量 × 平均客單價'}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-sm text-gray-600">計算結果:</span>
+                              <span className="text-sm font-semibold text-gray-800">
+                                {scrapedData['收益預估'][0]['潛在每月收益']['收益預估']['計算結果'] || 'NTD 0'}
+                              </span>
+                            </div>
+                            <div className="mt-2">
+                              <span className="text-xs text-gray-500">
+                                說明: {'此收益預估基於當前互動數據及假設的轉換率，幫助理解潛在的市場收益'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </div>

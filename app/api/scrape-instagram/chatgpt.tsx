@@ -8,8 +8,7 @@ if (!process.env.OPENAI_API_KEY) {
 interface InstagramPost {
     image_url: string;
     caption: string;
-    likes: number;
-    comments: number;
+    likes_and_comments: number;
 }
 
 interface InstagramData {
@@ -28,6 +27,9 @@ async function generateChatGPTResponse(
 
         // Remove or simplify the contextMessage since we're providing the data in messages
         const fullPrompt = prompt; // Just use the original prompt
+
+        // Start timer
+        const apiStartTime = performance.now();
 
         // Make API call to ChatGPT (you'll need to implement this based on your API setup)
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -59,7 +61,7 @@ async function generateChatGPTResponse(
                             },
                             {
                                 type: "text",
-                                text: `This post has ${post.likes} likes and ${post.comments} comments. Caption: ${post.caption}`
+                                text: `This post has ${post.likes_and_comments} likes and comments. Caption: ${post.caption}`
                             }
                         ]
                     })),
@@ -69,12 +71,16 @@ async function generateChatGPTResponse(
                     },
                 ],
                 temperature: 0.7,
-                max_tokens: 2000,
+                max_tokens: 10000,
                 response_format: { type: "json_object" },
             }),
         });
 
         const data = await response.json();
+
+        // End timer and log duration
+        const apiEndTime = performance.now();
+        console.log(`OpenAI API call took ${((apiEndTime - apiStartTime) / 1000).toFixed(2)} seconds`);
 
         // Add error handling for API response
         if (!response.ok) {
@@ -85,6 +91,7 @@ async function generateChatGPTResponse(
         if (!data.choices || !data.choices.length || !data.choices[0].message) {
             throw new Error('Invalid response format from OpenAI API');
         }
+        console.log(data);
 
         // Parse the JSON string into an object
         const analysisContent = JSON.parse(data.choices[0].message.content);
