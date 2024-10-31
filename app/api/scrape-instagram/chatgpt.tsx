@@ -25,16 +25,15 @@ function generateCacheKey(
             image_url: string;
         }>;
     },
-    model: OpenAIModel,
-    includePosts: boolean
+    model: OpenAIModel
 ): string {
     const dataFingerprint = {
         followers: instagramData.followers,
         bio: instagramData.bio,
-        postsCount: includePosts ? instagramData.posts.length : 0,
-        totalEngagement: includePosts ? instagramData.posts.reduce((sum, post) => sum + post.likes_and_comments, 0) : 0,
+        postsCount: instagramData.posts.length,
+        totalEngagement: instagramData.posts.reduce((sum, post) => sum + post.likes_and_comments, 0),
     };
-    return `${model}_${prompt}_${includePosts}_${JSON.stringify(dataFingerprint)}`;
+    return `${model}_${prompt}_${JSON.stringify(dataFingerprint)}`;
 }
 
 // Check if cache entry is valid
@@ -54,12 +53,11 @@ async function generateChatGPTResponse(
             image_url: string;
         }>;
     },
-    model: OpenAIModel = 'gpt-4o-mini', // Default model
-    includePosts: boolean = true // New parameter with default value true
+    model: OpenAIModel = 'gpt-4o-mini'
 ): Promise<BrandAnalysis> {
     try {
-        // Generate cache key - include the includePosts parameter
-        const cacheKey = generateCacheKey(prompt, instagramData, model, includePosts);
+        // Generate cache key
+        const cacheKey = generateCacheKey(prompt, instagramData, model);
 
         // Check cache
         const cachedEntry = cache.get(cacheKey);
@@ -80,34 +78,16 @@ async function generateChatGPTResponse(
             {
                 role: 'user',
                 content: `Analyzing Instagram account with ${instagramData.followers} followers. Bio: ${instagramData.bio}`
+            },
+            ...instagramData.posts.map((post) => ({
+                role: 'user',
+                content: `This post has ${post.likes_and_comments} likes and comments. Caption: ${post.caption}. Image URL: ${post.image_url}`
+            })),
+            {
+                role: 'user',
+                content: prompt,
             }
         ];
-
-        // Conditionally add posts to messages
-        if (includePosts) {
-            messages.push(
-                ...instagramData.posts.map((post) => ({
-                    role: 'user',
-                    content: `This post has ${post.likes_and_comments} likes and comments. Caption: ${post.caption}. Image URL: ${post.image_url}`
-                }))
-            );
-        }
-
-        messages.push({
-            role: 'user',
-            content: `Total likes and comments:  ${instagramData.posts.reduce((sum, post) => sum + post.likes_and_comments, 0)}.`
-        });
-
-        messages.push({
-            role: 'user',
-            content: `Total post counts:  ${instagramData.posts.length}.`
-        });
-
-        // Add final prompt
-        messages.push({
-            role: 'user',
-            content: prompt,
-        });
 
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',

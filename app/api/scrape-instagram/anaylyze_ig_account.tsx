@@ -489,9 +489,55 @@ const dummyBrandAnalysis: BrandAnalysis = {
                 公式: "每月潛在銷售量 × 平均客單價",
                 計算結果: 650400,
             }
+
         }
     }]
 };
+
+function calculateRevenueEstimation(followers: number, posts: any[]) {
+    // Filter out posts with NaN likes_and_comments and calculate total interactions
+    const validPosts = posts.filter(post => !isNaN(post.likes_and_comments));
+    const totalInteractions = validPosts.reduce((sum, post) => sum + post.likes_and_comments, 0);
+    
+    // Calculate average interactions per valid post
+    const postsCount = validPosts.length;
+    
+    // Rest of calculations using valid posts only
+    const avgInteractionsPerPost = totalInteractions / postsCount;
+    const engagementRate = avgInteractionsPerPost / followers;
+    const conversionRate = 0.05;
+    const potentialMonthlySales = Math.round(avgInteractionsPerPost * conversionRate);
+    const averageOrderValue = 1200;
+    const monthlyRevenue = potentialMonthlySales * averageOrderValue;
+
+    return [{
+        互動量計算: {
+            總互動數: {
+                公式: "總喜歡數 + 總評論數",
+                計算結果: totalInteractions
+            },
+            平均每篇互動率: {
+                公式: "總互動數 ÷ 貼文數 ÷ 追蹤者數量",
+                計算結果: engagementRate
+            }
+        },
+        銷售量預估分析: {
+            每月潛在銷售量計算: {
+                公式: "平均每篇互動數 × 假設下單率 5%",
+                計算結果: potentialMonthlySales
+            },
+            平均客單價: {
+                假設平均客單價: averageOrderValue
+            }
+        },
+        潛在每月收益: {
+            收益預估: {
+                公式: "每月潛在銷售量 × 平均客單價",
+                計算結果: monthlyRevenue
+            }
+        }
+    }];
+}
 
 export async function InstagramAnalysis(igUsername: string): Promise<BrandAnalysis> {
     const startTime = performance.now();
@@ -517,7 +563,10 @@ export async function InstagramAnalysis(igUsername: string): Promise<BrandAnalys
                     likes_and_comments: post.like_count + post.comments_count
                 }))
         };
-
+        console.log(transformedData)
+        // Replace the ChatGPT call for revenue estimation with direct calculation
+        const revenueEstimation = calculateRevenueEstimation(transformedData.followers, transformedData.posts);
+        
         // Run all prompts in parallel
         const {
             個人風格分析,
@@ -527,8 +576,7 @@ export async function InstagramAnalysis(igUsername: string): Promise<BrandAnalys
             品牌核心理念,
             行銷規劃,
             品牌形象風格,
-            品牌聲音,
-            收益預估
+            品牌聲音
         } = await Promise.all([
             generateChatGPTResponse(stylePrompt, transformedData, 'gpt-4o-mini')
                 .then(res => ({ 個人風格分析: res.個人風格分析 })),
@@ -545,9 +593,7 @@ export async function InstagramAnalysis(igUsername: string): Promise<BrandAnalys
             generateChatGPTResponse(brandDesignPrompt, transformedData, 'gpt-4o-mini')
                 .then(res => ({ 品牌形象風格: res.品牌形象風格 })),
             generateChatGPTResponse(brandVoicePrompt, transformedData, 'gpt-4o-mini')
-                .then(res => ({ 品牌聲音: res.品牌聲音 })),
-            generateChatGPTResponse(revenuePrompt, transformedData, 'gpt-4o', false)
-                .then(res => ({ 收益預估: res.收益預估 }))
+                .then(res => ({ 品牌聲音: res.品牌聲音 }))
         ]).then(results => Object.assign({}, ...results));
 
         const endTime = performance.now();
@@ -561,7 +607,7 @@ export async function InstagramAnalysis(igUsername: string): Promise<BrandAnalys
             行銷規劃,
             品牌形象風格,
             品牌聲音,
-            收益預估
+            收益預估: revenueEstimation
         } as BrandAnalysis;
 
     } catch (error) {
