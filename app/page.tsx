@@ -247,134 +247,7 @@ export default function BrandStrategyDashboard() {
     )
   }
 
-  const defaultBrandStrategySections = [
-    {
-      title: "品牌定位分析",
-      options: [
-        {
-          title: "奢華但平易近人",
-          content: "定位為奢華但平易近人的護膚品牌，結合時尚和護膚趨勢，提供源自您個人美容程序的產品。"
-        },
-        {
-          title: "科技驅動的護膚革新",
-          content: "將品牌定位為科技驅動的護膚革新，專注於利用最新科技成果開發創新護膚解決方案。"
-        },
-        {
-          title: "自然有機護膚",
-          content: "將品牌定位為自然有機護膚先驅，強調使用純天然、有機成分，提供溫和有效的護膚體驗。"
-        }
-      ],
-      icon: "🎯"
-    },
-    {
-      title: "目標受眾洞察",
-      options: [
-        {
-          title: "年輕都市女性",
-          content: "主要目標受眾為18-35歲的都市女性，對美容、時尚和生活方式感興趣，追求高品質和個性化的護膚品。"
-        },
-        {
-          title: "成熟女性市場",
-          content: "專注於35-50歲的熟女性市場，她們重視抗衰老和高效護膚，願意投資於優質護膚品。"
-        },
-        {
-          title: "男士護膚市場",
-          content: "瞄準不斷增長的男士護膚市場，年齡範圍25-45歲，關注簡單有效的護膚方案。"
-        }
-      ],
-      icon: ""
-    },
-    {
-      title: "產品線建議",
-      options: [
-        {
-          title: "奢華全面護理",
-          content: "開發包括保濕精華液、奢華保濕霜和溫和潔面乳在內的全面護理產品線，針對不同肌膚需求提供定制解決方案。"
-        },
-        {
-          title: "問題肌專家",
-          content: "專注於解決特定肌膚問題的產品線，如抗痘系列、敏感肌舒緩系列、美白淡斑系列等。"
-        },
-        {
-          title: "多功能護膚",
-          content: "推出多功能護膚產品線，每款產品都具備多重功效，簡化護膚步驟，適合現代快節奏生活。"
-        }
-      ],
-      icon: "🧴"
-    },
-    {
-      title: "品牌故事與價值觀",
-      options: [
-        {
-          title: "個人美容之旅",
-          content: "品牌故事源於創始人的個人美容之旅，強調自我護理、真實美和輕鬆奢華的價值觀。"
-        },
-        {
-          title: "科研創新傳奇",
-          content: "講述品牌在護膚科技領域的創新歷程，強調科學、創新和持續進步的價值觀。"
-        },
-        {
-          title: "自然和諧共生",
-          content: "分享品牌追求與自然和諧共生的理念，強調可持續發展、環保和對地球友好的價值觀。"
-        }
-      ],
-      icon: "📖"
-    },
-    {
-      title: "社交媒體營銷策略",
-      options: [
-        {
-          title: "Instagram視覺盛宴",
-          content: "專注於Instagram平台，創建吸引眼球的視覺內容，包括產品使用教程、護膚小貼士和用戶真實反饋。"
-        },
-        {
-          title: "TikTok短視頻營銷",
-          content: "利用TikTok平台的流行趨勢，製作有趣、吸引人的短視頻內容，展示產品使用效果和護膚小技巧。"
-        },
-        {
-          title: "KOL合作計劃",
-          content: "與各大社交平台上美妝KOL合作，通過他們的影響力擴大品牌知名度，提高產品可信度。"
-        }
-      ],
-      icon: "📣"
-    },
-    {
-      title: "品牌設計與視覺風格",
-      options: [
-        {
-          title: "簡約奢華",
-          content: "採用簡約而奢華的設計風格，使用柔和的粉彩和中性色調，突出產品的高級感和質感。"
-        },
-        {
-          title: "自然有機風",
-          content: "選用綠色、棕色等自然色調，搭配有機紋理和植物元素，體現品牌的自然、有機理念。"
-        },
-        {
-          title: "科技感設計",
-          content: "運用冷色調和幾何圖形，營造出現代、科技感的視覺效果，突出品牌的創新性。"
-        }
-      ],
-      icon: "🎨"
-    },
-    {
-      title: "品牌名稱與口號建議",
-      options: [
-        {
-          title: "GlowCare",
-          content: "口號：'擁抱日常魅力' - 體現品牌讓奢華護膚成為每個人日常美容程序一部分的使命。"
-        },
-        {
-          title: "NatureLuxe",
-          content: "口號：'自然之美，奢華呵護' - 強調品牌結合自然成分和奢華體驗的獨特定位。"
-        },
-        {
-          title: "SkinTech",
-          content: "口號：'科技賦能，煥發美肌' - 突出品牌運用先進科技提升護膚效果的特點。"
-        }
-      ],
-      icon: "✨"
-    },
-  ]
+
 
   // const colorPalette = [
   //   { color: "#F9E5D8", name: "柔和米色" },
@@ -458,8 +331,6 @@ export default function BrandStrategyDashboard() {
           icon: getIconForSection(title)
         }));
       setBrandStrategySections(transformedData);
-    } else {
-      setBrandStrategySections(defaultBrandStrategySections);
     }
   }, [scrapedData]);
 
@@ -550,7 +421,7 @@ export default function BrandStrategyDashboard() {
               <StepCard
                 icon={FileText}
                 title="步驟 2: 生成初步品牌策略報告"
-                description="系統會分析您的 Instagram 內容並生成初步的品牌策略報告。點擊「生成品牌策略報告」查看結果。"
+                description="系統會分析您的 Instagram 內容並生成初步的品牌策略報告。"
               />
               {/* <StepCard
                 icon={Share}
@@ -565,7 +436,7 @@ export default function BrandStrategyDashboard() {
               <StepCard
                 icon={FileCheck}
                 title="步驟 3: 生成最終品牌策略"
-                description="當所有投票結果上傳完成後，點擊「生成最終品牌策略」按鈕，獲取基於粉絲反饋優化的最終品牌策略。"
+                description="點擊「聯絡我們」，我們將根據您的策略生成最終的品牌策略。"
               />
             </div>
           </CardContent>
@@ -634,7 +505,7 @@ export default function BrandStrategyDashboard() {
                                 {Object.entries(option).map(([key, value]) => {
                                   // Skip the 'strategy' key since we don't want to display it
                                   if (key === 'strategy') return null;
-                                  
+
                                   return (
                                     <div key={key} className="mb-4">
                                       <h4 className="font-semibold text-base text-gray-800">
@@ -657,7 +528,7 @@ export default function BrandStrategyDashboard() {
               </div>
               {/* Add Revenue Estimate Card */}
               {scrapedData && scrapedData['收益預估'] && (
-                <div className="mt-8">
+                <div className="mt-8 max-w-2xl mx-auto">
                   <Card className="border-none shadow-lg bg-white">
                     <CardHeader>
                       <div className="flex items-center justify-between">
@@ -684,7 +555,7 @@ export default function BrandStrategyDashboard() {
                             <div className="bg-gray-50 p-3 rounded-lg text-sm">
                               <div className="flex justify-between items-center">
                                 <span className="text-gray-600">計算公式:</span>
-                                <span>{scrapedData['收益預估'][0]['互動量計算']['總互動數']['公式']}</span>
+                                <span>{"總喜歡數 + 總評論數"}</span>
                               </div>
                             </div>
                           </div>
@@ -701,7 +572,7 @@ export default function BrandStrategyDashboard() {
                             <div className="bg-gray-50 p-3 rounded-lg text-sm">
                               <div className="flex justify-between items-center">
                                 <span className="text-gray-600">計算公式:</span>
-                                <span>{scrapedData['收益預估'][0]['互動量計算']['平均每篇互動率']['公式']}</span>
+                                <span>{"總互動數 ÷ 9 ÷ 追蹤者數量"}</span>
                               </div>
                             </div>
                           </div>
@@ -718,16 +589,16 @@ export default function BrandStrategyDashboard() {
                             <div className="bg-gray-50 p-3 rounded-lg text-sm">
                               <div className="flex justify-between items-center">
                                 <span className="text-gray-600">計算公式:</span>
-                                <span>{scrapedData['收益預估'][0]['銷售量預估分析']['每月潛在銷售量計算']['公式']}</span>
+                                <span>{"平均每篇貼文互動數 × 假設互動率 20%"}</span>
                               </div>
                             </div>
                           </div>
                         </StepSummary>
-
                         <StepSummary
                           step={4}
                           title="平均客單價"
                           result={Number(scrapedData['收益預估'][0]['銷售量預估分析']['平均客單價']['假設平均客單價']).toLocaleString('en-US')}
+                          formula=""
                         >
                           <p className="text-sm text-gray-600">假設的平均每筆交易金額，基於市場調研及產品定位。</p>
                         </StepSummary>
@@ -743,7 +614,7 @@ export default function BrandStrategyDashboard() {
                             <div className="bg-gray-50 p-3 rounded-lg text-sm">
                               <div className="flex justify-between items-center">
                                 <span className="text-gray-600">計算公式:</span>
-                                <span>{scrapedData['收益預估'][0]['潛在每月收益']['收益預估']['公式']}</span>
+                                <span>{"每月潛在銷售量 × 平均客單價"}</span>
                               </div>
                               <div className="mt-2 text-xs text-gray-500">
                                 {"此收益預估基於當前互動數據及假設的轉換率，幫助理解潛在的市場收益"}
@@ -923,7 +794,7 @@ export default function BrandStrategyDashboard() {
 }
 
 // Add this component at the bottom of your file
-function StepSummary({ step, title, result, formula, children }) {
+function StepSummary({ step, title, result, formula, children }: { step: number, title: string, result: string, formula: string, children: React.ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
