@@ -541,6 +541,11 @@ export default function BrandStrategyDashboard() {
                         </div>
                       </div>
                       <CardDescription>每月潛在收益</CardDescription>
+                      {Number(scrapedData['收益預估'][0]['互動量計算']['總互動數']['計算結果']) === 0 && (
+                        <p className="text-sm text-red-500 mt-1">
+                          若隱藏讚數與留言數，將無法分析互動
+                        </p>
+                      )}
                     </CardHeader>
                     <CardContent>
                       <div className="grid gap-2">

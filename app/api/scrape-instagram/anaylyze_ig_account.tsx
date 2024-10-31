@@ -49,7 +49,7 @@ export interface BrandAnalysis {
 }
 
 const stylePrompt = `
-請根據此網紅的 Instagram 照片與文章內容、followers count、bio、like+comment 的總和, 分析此IG帳號的風格與定位,
+請根據此網紅的 Instagram 照片與文章內容、followers count、bio、like+comment 的總和, 分析此IG帳號的風格與定位, 協助他理解如何創立個人護膚保養品牌
 若網紅的風格明確屬於某國家風格，請標明該國家的風格（如：歐美、韓國、日系）。回覆JSON格式:
 {
   "個人風格分析": [
@@ -65,7 +65,7 @@ const stylePrompt = `
 `;
 
 const targetPrompt = `
-分析此IG帳號的風格與定位，回覆JSON格式：:
+分析此IG帳號的風格與定位，協助他理解如何創立個人護膚保養品牌，回覆JSON格式：:
 {
   "目標受眾洞察": [
     {
@@ -80,7 +80,7 @@ const targetPrompt = `
 `;
 
 const brandPrompt = `
-分析此IG帳號的品牌定位，回覆JSON格式：:
+分析此IG帳號的品牌定位，協助他理解如何創立個人護膚保養品牌，回覆JSON格式：:
 {
   "品牌定位": [
     {
@@ -95,7 +95,7 @@ const brandPrompt = `
 `
 
 const coreValuePrompt = `
-分析此IG帳號的品牌核心理念，回覆JSON格式：:
+分析此IG帳號的品牌核心理念，協助他理解如何創立個人護膚保養品牌，回覆JSON格式：:
 {
   "品牌核心理念": [
     {
@@ -110,7 +110,7 @@ const coreValuePrompt = `
 `
 
 const productLinePrompt = `
-分析此IG帳號的產品策略，回覆JSON格式：:
+分析此IG帳號的產品策略，協助他理解如何創立個人護膚保養品牌，回覆JSON格式：:
 {
   "產品策略": [
     {
@@ -126,7 +126,7 @@ const productLinePrompt = `
 
 
 const socialMediaPrompt = `
-分析此IG帳號的行銷規劃，回覆JSON格式：:
+分析此IG帳號的行銷規劃，協助他理解如何創立個人護膚保養品牌，回覆JSON格式：:
 {
   "行銷規劃": [
     {
@@ -141,7 +141,7 @@ const socialMediaPrompt = `
 `
 
 const brandDesignPrompt = `
-分析此IG帳號的品牌形象風格，回覆JSON格式：:
+分析此IG帳號的品牌形象風格，協助他理解如何創立個人護膚保養品牌，回覆JSON格式：:
 {
   "品牌形象風格": [
     {
@@ -157,7 +157,7 @@ const brandDesignPrompt = `
 `
 
 const brandVoicePrompt = `
-分析此IG帳號的品牌聲音，回覆JSON格式：:
+分析此IG帳號的品牌聲音，協助他理解如何創立個人護膚保養品牌，回覆JSON格式：:
 {
   "品牌聲音": [
     {
@@ -172,7 +172,7 @@ const brandVoicePrompt = `
 `
 
 const revenuePrompt = `
-分析此IG帳號的收益預估，請根據其日常 Instagram 貼文的互動率(engagement)進行分析他如果開始販售的話的報酬預估，回覆JSON格式：:
+分析此IG帳號的收益預估，請根據其日常 Instagram 貼文的互動率(engagement)進行分析他如果開始販售的話的報酬預估，協助他理解如何創立個人護膚保養品牌，回覆JSON格式：:
 {
   "收益預估":[ {
     "互動量計算": {
