@@ -3,12 +3,13 @@ import generateChatGPTResponse from './chatgpt';
 import { getCredentials } from './defines';
 
 
-interface StrategyItem {
+// Export the interfaces
+export interface StrategyItem {
     strategy: string;
     [key: string]: string; // For flexible additional fields
 }
 
-interface RevenueEstimation {
+export interface RevenueEstimation {
     互動量計算: {
         總互動數: {
             公式: string;
@@ -37,7 +38,7 @@ interface RevenueEstimation {
     };
 }
 
-interface BrandAnalysis {
+export interface BrandAnalysis {
     個人風格分析: StrategyItem[];
     品牌定位分析: StrategyItem[];
     目標受眾洞察: StrategyItem[];
