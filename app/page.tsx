@@ -301,13 +301,13 @@ export default function BrandStrategyDashboard() {
   const getIconForSection = (title: string): string => {
     const iconMap = {
       "個人風格分析": "👤",
-      "品牌定位分析": "🎯",
+      "品牌定位": "🎯",
       "目標受眾洞察": "👥",
       "產品線建議": "🧴",
-      "品牌故與價值觀": "📖",
-      "社交媒體營銷策略": "📱",
-      "品牌設計與視覺風格": "🎨",
-      "品牌聲音與溝通口號": "🗣️",
+      "品牌核心理念": "📖",
+      "行銷規劃": "📱",
+      "品牌形象風格": "🎨",
+      "品牌聲音": "🗣️",
     } as const;
     return iconMap[title as keyof typeof iconMap] || "✨"; // Default icon if not found
   }

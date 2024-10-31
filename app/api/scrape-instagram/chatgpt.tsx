@@ -25,15 +25,16 @@ function generateCacheKey(
             image_url: string;
         }>;
     },
-    model: OpenAIModel
+    model: OpenAIModel,
+    includePosts: boolean
 ): string {
     const dataFingerprint = {
         followers: instagramData.followers,
         bio: instagramData.bio,
-        postsCount: instagramData.posts.length,
-        totalEngagement: instagramData.posts.reduce((sum, post) => sum + post.likes_and_comments, 0),
+        postsCount: includePosts ? instagramData.posts.length : 0,
+        totalEngagement: includePosts ? instagramData.posts.reduce((sum, post) => sum + post.likes_and_comments, 0) : 0,
     };
-    return `${model}_${prompt}_${JSON.stringify(dataFingerprint)}`;
+    return `${model}_${prompt}_${includePosts}_${JSON.stringify(dataFingerprint)}`;
 }
 
 // Check if cache entry is valid
@@ -53,11 +54,12 @@ async function generateChatGPTResponse(
             image_url: string;
         }>;
     },
-    model: OpenAIModel = 'gpt-4o-mini' // Default model
+    model: OpenAIModel = 'gpt-4o-mini', // Default model
+    includePosts: boolean = true // New parameter with default value true
 ): Promise<BrandAnalysis> {
     try {
-        // Generate cache key
-        const cacheKey = generateCacheKey(prompt, instagramData, model);
+        // Generate cache key - include the includePosts parameter
+        const cacheKey = generateCacheKey(prompt, instagramData, model, includePosts);
 
         // Check cache
         const cachedEntry = cache.get(cacheKey);
@@ -69,6 +71,44 @@ async function generateChatGPTResponse(
         console.log(`Making new API call with model: ${model}`);
         const apiStartTime = performance.now();
 
+        // Base messages array
+        const messages = [
+            {
+                role: 'system',
+                content: 'You are a helpful assistant that always responds in JSON format.'
+            },
+            {
+                role: 'user',
+                content: `Analyzing Instagram account with ${instagramData.followers} followers. Bio: ${instagramData.bio}`
+            }
+        ];
+
+        // Conditionally add posts to messages
+        if (includePosts) {
+            messages.push(
+                ...instagramData.posts.map((post) => ({
+                    role: 'user',
+                    content: `This post has ${post.likes_and_comments} likes and comments. Caption: ${post.caption}. Image URL: ${post.image_url}`
+                }))
+            );
+        }
+
+        messages.push({
+            role: 'user',
+            content: `Total likes and comments:  ${instagramData.posts.reduce((sum, post) => sum + post.likes_and_comments, 0)}.`
+        });
+
+        messages.push({
+            role: 'user',
+            content: `Total post counts:  ${instagramData.posts.length}.`
+        });
+
+        // Add final prompt
+        messages.push({
+            role: 'user',
+            content: prompt,
+        });
+
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -76,37 +116,8 @@ async function generateChatGPTResponse(
                 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
             },
             body: JSON.stringify({
-                model, // Use the provided model
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are a helpful assistant that always responds in JSON format.'
-                    },
-                    {
-                        role: 'user',
-                        content: `Analyzing Instagram account with ${instagramData.followers} followers. Bio: ${instagramData.bio}`
-                    },
-                    ...instagramData.posts.map((post: { image_url: any; likes_and_comments: any; caption: any; }) => ({
-                        role: 'user',
-                        content: [
-                            {
-                                type: "image_url",
-                                image_url: {
-                                    url: post.image_url,
-                                    detail: "low"
-                                }
-                            },
-                            {
-                                type: "text",
-                                text: `This post has ${post.likes_and_comments} likes and comments. Caption: ${post.caption}`
-                            }
-                        ]
-                    })),
-                    {
-                        role: 'user',
-                        content: prompt,
-                    },
-                ],
+                model,
+                messages,
                 temperature: 0.7,
                 max_tokens: 10000,
                 response_format: { type: "json_object" },
@@ -115,7 +126,7 @@ async function generateChatGPTResponse(
 
         const data = await response.json();
         const apiEndTime = performance.now();
-        console.log(`OpenAI API call took ${((apiEndTime - apiStartTime) / 1000).toFixed(2)} seconds`);
+        console.log(`OpenAI API call with ${model} took ${((apiEndTime - apiStartTime) / 1000).toFixed(2)} seconds`);
 
         if (!response.ok) {
             throw new Error(`OpenAI API error: ${data.error?.message || 'Unknown error'}`);

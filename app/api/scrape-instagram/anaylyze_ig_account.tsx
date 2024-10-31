@@ -38,13 +38,13 @@ export interface RevenueEstimation {
 
 export interface BrandAnalysis {
     個人風格分析: StrategyItem[];
-    品牌定位分析: StrategyItem[];
+    品牌定位: StrategyItem[];
     目標受眾洞察: StrategyItem[];
-    產品線建議: StrategyItem[];
-    品牌故事與價值觀: StrategyItem[];
-    社交媒體營銷策略: StrategyItem[];
-    品牌設計與視覺風格: StrategyItem[];
-    品牌聲音與溝通口號: StrategyItem[];
+    產品策略: StrategyItem[];
+    品牌核心理念: StrategyItem[];
+    行銷規劃: StrategyItem[];
+    品牌形象風格: StrategyItem[];
+    品牌聲音: StrategyItem[];
     收益預估: RevenueEstimation[];
 }
 
@@ -80,39 +80,24 @@ const targetPrompt = `
 `;
 
 const brandPrompt = `
-分析此IG帳號的品牌定位分析，回覆JSON格式：:
+分析此IG帳號的品牌定位，回覆JSON格式：:
 {
-  "品牌定位分析": [
+  "品牌定位": [
     {
-      "市場定位": "描述品牌的市場定位（如高端、平價）。",
+      "市場定位": "描述品牌的市場定位（如高端、平價、時尚潮流、大眾）。",
       "差異化優勢": "提出品牌在市場中的差異化策略。",
       "競爭優勢": "分析品牌如何在同類產品中脫穎而出。"
     },
     ...
   ],
 }
-請確保三個品牌定位分析，每個包括標題與20-30字的內容。
-`
-
-const productLinePrompt = `
-分析此IG帳號的產品線建議，回覆JSON格式：:
-{
-  "產品線建議": [
-    {
-      "產品建議": "根據目標受眾需求，提出具體的產品建議。",
-      "核心需求": "建議可以推出的產品類型。",
-      "市場趨勢": "強調符合市場趨勢的產品創新建議。"
-    },
-    ...
-  ],
-}
-請確保三個產品線建議，每個包括標題與20-30字的內容。
+請確保三個品牌定位，每個包括標題與20-30字的內容。
 `
 
 const coreValuePrompt = `
-分析此IG帳號的品牌故事與價值觀，回覆JSON格式：:
+分析此IG帳號的品牌核心理念，回覆JSON格式：:
 {
-  "品牌故事與價值觀": [
+  "品牌核心理念": [
     {
       "品牌故事": "建議品牌的故事核心，並說明如何與消費者建立情感聯繫。",
       "核心價值觀": "提供品牌最重要的價值觀。",
@@ -121,52 +106,69 @@ const coreValuePrompt = `
     ...
   ],
 }
-請確保三個品牌故事與價值觀，每個包括標題與20-30字的內容。
+請確保三個品牌核心理念，每個包括標題與20-30字的內容。
 `
 
-const socialMediaPrompt = `
-分析此IG帳號的社交媒體營銷策略，回覆JSON格式：:
+const productLinePrompt = `
+分析此IG帳號的產品策略，回覆JSON格式：:
 {
-  "社交媒體營銷策略": [
+  "產品策略": [
     {
-      "營銷策略": "提供具體的社交媒體策略以增加品牌曝光。",
-      "KOL合作": "建議如何通過合作KOL來提升品牌影響力。",
-      "轉化策略": "分析如何有效將粉絲轉化為顧客。"
+      "主打產品類型": "建議可以推出的主打產品類型。"
+      "產品特色": "根據目標受眾需求，提出具體的產品差異化建議。",
+      "產品包裝": "設計具有辨識度的包裝，傳遞品牌形象並增加吸引力。"
     },
     ...
   ],
 }
-請確保三個社交媒體營銷策略，每個包括標題與20-30字的內容。
+請確保三個產品策略，每個包括標題與20-30字的內容。
+`
+
+
+const socialMediaPrompt = `
+分析此IG帳號的行銷規劃，回覆JSON格式：:
+{
+  "行銷規劃": [
+    {
+      "預熱期": "提供具體且創意的行銷規劃產品的上市做預熱，建議要用什麼方式引起消費者的注意。",
+      "正式上市期": "產品正式上市的一週至三週內，如何最大化曝光並讓消費者成功轉單。",
+      "上市後期": "如何經營與消費者的售後關係，並讓消費者願意再次回購。"
+    },
+    ...
+  ],
+}
+請確保產出三個行銷規劃，每個包括標題與20-30字的內容。
 `
 
 const brandDesignPrompt = `
-分析此IG帳號的品牌設計與視覺風格，回覆JSON格式：:
+分析此IG帳號的品牌形象風格，回覆JSON格式：:
 {
-  "品牌設計與視覺風格": [
+  "品牌形象風格": [
     {
       "視覺設計建議": "根據帳號風格，提出適合的品牌視覺設計建議。",
       "設計元素": "描述具體的設計元素（如色彩、字體）及其影響。",
       "品牌識別": "強調視覺風格如何提升品牌識別度。"
+      "參考品牌": "請列出相似形象風格的保養美妝品牌提供參考。"
     },
     ...
   ],
 }
-請確保三個品牌設計與視覺風格，每個包括標題與20-30字的內容。
+請確保三個品牌形象風格，每個包括標題與20-30字的內容。
 `
 
 const brandVoicePrompt = `
-分析此IG帳號的品牌聲音與溝通口號，回覆JSON格式：:
+分析此IG帳號的品牌聲音，回覆JSON格式：:
 {
-  "品牌聲音與溝通口號": [
+  "品牌聲音": [
     {
-        "品牌聲音": "提供適合品牌的聲音和溝通方式建議。",
-        "溝通口號": "建議簡短且具影響力的品牌口號。",
+        "溝通語氣": "建議品牌在撰寫文案、與消費者溝通石所表達情感的方式、語氣。",
+        "溝通風格": "建議品牌如何選擇用詞、句式和表達方式。例如，有些品牌會使用簡短、直接的句子，有些則偏好細膩的描述。",
         "情感聯繫": "說明品牌聲音如何增強品牌與消費者的情感聯繫。"
     },
     ...
   ],
 }
-請確保三個品牌聲音與溝通口號，每個包括標題與20-30字的內容。
+請確保三個品牌聲音，每個包括標題與20-30字的內容。
 `
 
 const revenuePrompt = `
@@ -179,13 +181,13 @@ const revenuePrompt = `
       "計算結果": 計算結果
     },
     "平均每篇互動率": {
-      "公式": "總互動數 ÷ 9 ÷ 追蹤者數量",
+      "公式": "總互動數 ÷ 貼文數 ÷ 追蹤者數量",
       "計算結果": 計算結果
     }
   },
   "銷售量預估分析": {
     "每月潛在銷售量計算": {
-      "公式": "總互動數 ÷ 9 × 假設下單率 20%",
+      "公式": ""假設平均每篇貼文互動數為死忠粉絲數， 平均每篇貼文互動數 × 假設下單率 5%",
       "計算結果": 計算結果
     },
     "平均客單價": {
@@ -322,7 +324,7 @@ const dummyBrandAnalysis: BrandAnalysis = {
             潛在價值: "吸引注重肌膚保養的消費者"
         }
     ],
-    品牌定位分析: [
+    品牌定位: [
         {
             strategy: "策略方向一",
             定位特徵: "專注於解決特定肌膚問題的產品線，如抗痘系列、敏感肌舒緩系列、美白淡斑系列等。",
@@ -362,7 +364,7 @@ const dummyBrandAnalysis: BrandAnalysis = {
             潛在價值: "3.吸引尋求時尚美容產品的消費者"
         }
     ],
-    產品線建議: [
+    產品策略: [
         {
             strategy: "策略方向一",
             產品線特徵: "1.推出針對乾燥肌膚的保濕系列，結合天然成分，增添清新感受。",
@@ -382,7 +384,7 @@ const dummyBrandAnalysis: BrandAnalysis = {
             潛在價值: "3.吸引尋求肌膚保養的消費者"
         },
     ],
-    品牌故事與價值觀: [
+    品牌核心理念: [
         {
             strategy: "策略方向一",
             故事特徵: "1.品牌故事圍繞著對肌膚的熱愛和對自然的追求，講述了品牌如何從一個小工作室發展成為知名品牌的過程。",
@@ -402,7 +404,7 @@ const dummyBrandAnalysis: BrandAnalysis = {
             潛在價值: "3.吸引尋求肌膚保養的消費者"
         }
     ],
-    社交媒體營銷策略: [
+    行銷規劃: [
         {
             strategy: "策略方向一",
             營銷特徵: "1.利用Instagram的直播功能，進行即時互動和產品展示，吸引粉絲參與。",
@@ -422,7 +424,7 @@ const dummyBrandAnalysis: BrandAnalysis = {
             潛在價值: "3.吸引尋求即時互動和產品展示的消費者"
         }
     ],
-    品牌設計與視覺風格: [
+    品牌形象風格: [
         {
             strategy: "策略方向一",
             設計特徵: "1.品牌設計以簡約、現代為主，使用現代感強的色彩和簡潔的線條，強調產品的質感和時尚感。",
@@ -442,7 +444,7 @@ const dummyBrandAnalysis: BrandAnalysis = {
             潛在價值: "3.吸引尋求肌膚保養的消費者"
         }
     ],
-    品牌聲音與溝通口號: [
+    品牌聲音: [
         {
             strategy: "策略方向一",
             聲音特徵: "1.品牌聲音以自然、親切為主，使用簡單易懂的語言，強調產品的質感和效果。",
@@ -519,13 +521,13 @@ export async function InstagramAnalysis(igUsername: string): Promise<BrandAnalys
         // Run all prompts in parallel
         const {
             個人風格分析,
+            品牌定位,
             目標受眾洞察,
-            品牌定位分析,
-            產品線建議,
-            品牌故事與價值觀,
-            社交媒體營銷策略,
-            品牌設計與視覺風格,
-            品牌聲音與溝通口號,
+            產品策略,
+            品牌核心理念,
+            行銷規劃,
+            品牌形象風格,
+            品牌聲音,
             收益預估
         } = await Promise.all([
             generateChatGPTResponse(stylePrompt, transformedData, 'gpt-4o-mini')
@@ -533,18 +535,18 @@ export async function InstagramAnalysis(igUsername: string): Promise<BrandAnalys
             generateChatGPTResponse(targetPrompt, transformedData, 'gpt-4o-mini')
                 .then(res => ({ 目標受眾洞察: res.目標受眾洞察 })),
             generateChatGPTResponse(brandPrompt, transformedData, 'gpt-4o-mini')
-                .then(res => ({ 品牌定位分析: res.品牌定位分析 })),
+                .then(res => ({ 品牌定位: res.品牌定位 })),
             generateChatGPTResponse(productLinePrompt, transformedData, 'gpt-4o-mini')
-                .then(res => ({ 產品線建議: res.產品線建議 })),
+                .then(res => ({ 產品策略: res.產品策略 })),
             generateChatGPTResponse(coreValuePrompt, transformedData, 'gpt-4o-mini')
-                .then(res => ({ 品牌故事與價值觀: res.品牌故事與價值觀 })),
+                .then(res => ({ 品牌核心理念: res.品牌核心理念 })),
             generateChatGPTResponse(socialMediaPrompt, transformedData, 'gpt-4o-mini')
-                .then(res => ({ 社交媒體營銷策略: res.社交媒體營銷策略 })),
+                .then(res => ({ 行銷規劃: res.行銷規劃 })),
             generateChatGPTResponse(brandDesignPrompt, transformedData, 'gpt-4o-mini')
-                .then(res => ({ 品牌設計與視覺風格: res.品牌設計與視覺風格 })),
+                .then(res => ({ 品牌形象風格: res.品牌形象風格 })),
             generateChatGPTResponse(brandVoicePrompt, transformedData, 'gpt-4o-mini')
-                .then(res => ({ 品牌聲音與溝通口號: res.品牌聲音與溝通口號 })),
-            generateChatGPTResponse(revenuePrompt, transformedData, 'gpt-4o')
+                .then(res => ({ 品牌聲音: res.品牌聲音 })),
+            generateChatGPTResponse(revenuePrompt, transformedData, 'gpt-4o', false)
                 .then(res => ({ 收益預估: res.收益預估 }))
         ]).then(results => Object.assign({}, ...results));
 
@@ -552,13 +554,13 @@ export async function InstagramAnalysis(igUsername: string): Promise<BrandAnalys
         console.log(`Instagram analysis took ${((endTime - startTime) / 1000).toFixed(2)} seconds`);
         return {
             個人風格分析,
+            品牌定位,
             目標受眾洞察,
-            品牌定位分析,
-            產品線建議,
-            品牌故事與價值觀,
-            社交媒體營銷策略,
-            品牌設計與視覺風格,
-            品牌聲音與溝通口號,
+            產品策略,
+            品牌核心理念,
+            行銷規劃,
+            品牌形象風格,
+            品牌聲音,
             收益預估
         } as BrandAnalysis;
 
