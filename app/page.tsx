@@ -280,7 +280,7 @@ export default function BrandStrategyDashboard() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-2">
               <a
-                href="https://www.own-grow.com/home-tw"
+                href="https://www.own-grow.com/home-tw?utm_source=aitool&utm_medium=logo&utm_campaign=1101"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="cursor-pointer"
@@ -298,7 +298,7 @@ export default function BrandStrategyDashboard() {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6">
               <a
-                href="https://calendly.com/luna-own-grow/meet-with-me"
+                href="http://bit.ly/48tGR1b"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 hover:text-purple-600 transition-colors"
@@ -333,7 +333,7 @@ export default function BrandStrategyDashboard() {
             <div className="md:hidden py-6 px-4 bg-white border-t border-gray-100">
               <nav className="flex flex-col items-center space-y-6">
                 <a
-                  href="https://calendly.com/luna-own-grow/meet-with-me"
+                  href="http://bit.ly/48tGR1b"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xl text-gray-800 hover:text-purple-600 transition-colors text-center"
@@ -928,7 +928,7 @@ export default function BrandStrategyDashboard() {
             <div className="flex justify-center">
               <Button
                 className="bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white font-semibold"
-                onClick={() => window.open('https://calendly.com/luna-own-grow/meet-with-me', '_blank')}
+                onClick={() => window.open('http://bit.ly/48tGR1b', '_blank')}
               >
                 聯絡我們
               </Button>
