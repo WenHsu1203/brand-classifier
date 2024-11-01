@@ -9,6 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Instagram, Youtube, Facebook, Share2, Upload, Search, FileText, Share, Upload as UploadIcon, FileCheck, Menu, ChevronUp, ChevronDown } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
+import { getCredentials } from "./api/scrape-instagram/defines"
+import { getAccountInfo } from "./api/scrape-instagram/business_discovery"
+import generateChatGPTResponse from "./api/scrape-instagram/chatgpt"
+import { brandDesignPrompt, brandPrompt, brandVoicePrompt, calculateRevenueEstimation, coreValuePrompt, productLinePrompt, socialMediaPrompt, stylePrompt, targetPrompt } from "./api/scrape-instagram/anaylyze_ig_account"
 
 
 
@@ -64,33 +68,121 @@ const InstagramScraper = ({ onDataReceived, onComplete }: {
   const [error, setError] = useState<string | null>(null)
 
   const handleScrape = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null) // Reset error state
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const response = await fetch('/api/scrape-instagram', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ account }),
-      })
-
-      if (!response.ok) {
+      // Strip @ symbol if it exists
+      const cleanUsername = account.startsWith('@') ? account.substring(1) : account;
+      const creds = getCredentials();
+      const account_info = await getAccountInfo(creds, cleanUsername);
+      if (account_info.json_data.error) {
         throw new Error('輸入錯誤, 或是未開放為商業帳號')
       }
+      // Transform the data to match InstagramData interface
+      const transformedData = {
+        followers: account_info.json_data.business_discovery.followers_count,
+        bio: account_info.json_data.business_discovery.biography,
+        posts: account_info.json_data.business_discovery.media.data
+          .slice(0, 9)
+          .map((post: { media_type: string; thumbnail_url: any; media_url: any; caption: any; like_count: any; comments_count: any; }) => ({
+            image_url: post.media_type === 'VIDEO' ? post.thumbnail_url : post.media_url,
+            caption: post.caption || '',
+            likes_and_comments: post.like_count + post.comments_count
+          }))
+      };
 
-      const data = await response.json()
-      onDataReceived(data)
-      onComplete()
+      // Define the prompt groups
+      const analysisPrompts = [
+        { key: '個人風格分析', prompt: stylePrompt },
+        { key: '目標受眾洞察', prompt: targetPrompt }
+      ];
+
+      const positioningPrompts = [
+        { key: '品牌定位', prompt: brandPrompt }
+      ];
+
+      const strategyPrompts = [
+        { key: '產品策略', prompt: productLinePrompt },
+        { key: '品牌核心理念', prompt: coreValuePrompt },
+        { key: '行銷規劃', prompt: socialMediaPrompt },
+        { key: '品牌形象風格', prompt: brandDesignPrompt },
+        { key: '品牌聲音', prompt: brandVoicePrompt }
+      ];
+
+      // Create a counter to track completed requests
+      let completedAnalysis = 0;
+      const totalAnalysis = analysisPrompts.length;
+
+      // Process analysis prompts
+      analysisPrompts.forEach(({ key, prompt }) => {
+        generateChatGPTResponse(prompt, transformedData, 'gpt-4o-mini')
+          .then(res => {
+            const analysisResult = { [key]: res[key] };
+            onDataReceived({ 
+              type: 'analysis',
+              data: analysisResult 
+            });
+            
+            // Increment counter and check if all analysis is complete
+            completedAnalysis++;
+            if (completedAnalysis === totalAnalysis) {
+              onComplete();
+              setIsLoading(false); // Only set loading to false when analysis is complete
+            }
+          })
+          .catch(error => {
+            console.error(`Error generating ${key}:`, error);
+            // Increment counter even on error to prevent blocking
+            completedAnalysis++;
+            if (completedAnalysis === totalAnalysis) {
+              onComplete();
+              setIsLoading(false); // Also handle loading state on error
+            }
+          });
+      });
+
+      // Process other prompts without affecting loading state
+      positioningPrompts.forEach(({ key, prompt }) => {
+        generateChatGPTResponse(prompt, transformedData, 'gpt-4o-mini')
+          .then(res => {
+            onDataReceived({ 
+              type: 'positioning',
+              data: { [key]: res[key] } 
+            });
+          })
+          .catch(error => {
+            console.error(`Error generating ${key}:`, error);
+          });
+      });
+
+      strategyPrompts.forEach(({ key, prompt }) => {
+        generateChatGPTResponse(prompt, transformedData, 'gpt-4o-mini')
+          .then(res => {
+            onDataReceived({ 
+              type: 'strategy',
+              data: { [key]: res[key] } 
+            });
+          })
+          .catch(error => {
+            console.error(`Error generating ${key}:`, error);
+          });
+      });
+
+      // Calculate revenue estimation immediately
+      const revenueEstimation = calculateRevenueEstimation(transformedData.followers, transformedData.posts);
+      onDataReceived({ 
+        type: 'revenue',
+        data: { 收益預估: revenueEstimation } 
+      });
+
     } catch (error) {
-      console.error('Error:', error)
-      setError('輸入錯誤, 或是未開放為商業帳號')
-    } finally {
-      setIsLoading(false)
+      console.error('Error:', error);
+      setError('輸入錯誤, 或是未開放為商業帳號');
+      setIsLoading(false); // Set loading to false on error
     }
-  }
+  };
 
   return (
     <div className="flex flex-col items-center space-y-4 w-full mx-auto px-4"> {/* Added px-4 for padding */}
@@ -130,7 +222,7 @@ const InstagramScraper = ({ onDataReceived, onComplete }: {
       }
       {isLoading && (
         <p className="text-sm bg-gradient-to-r from-purple-500 to-orange-500 bg-clip-text text-transparent font-medium mt-2">
-          可能會需要30秒, 可以先去上個廁所💩
+          正在用 AI 分析中, 請稍後...
         </p>
       )}
       <p className="text-sm text-orange-500 font-medium text-center"> {/* Added text-center */}
@@ -148,6 +240,10 @@ type BrandStrategySection = {
 };
 
 export default function BrandStrategyDashboard() {
+  const [analysisData, setAnalysisData] = useState({});
+  const [positioningData, setPositioningData] = useState({});
+  const [strategyData, setStrategyData] = useState({});
+  const [revenueData, setRevenueData] = useState(null);
   const [selectedCard, setSelectedCard] = useState(null)
   const [uploadedImage, setUploadedImage] = useState(null)
   const [selectedPillar, setSelectedPillar] = useState("")
@@ -156,6 +252,23 @@ export default function BrandStrategyDashboard() {
   const strategyRef = useRef<HTMLDivElement>(null)
   const nextStepsRef = useRef<HTMLDivElement>(null)
   const aiGeneratorRef = useRef<HTMLDivElement>(null)
+
+  const handleDataReceived = ({ type, data }: { type: string, data: any }) => {
+    switch (type) {
+      case 'analysis':
+        setAnalysisData(prev => ({ ...prev, ...data }));
+        break;
+      case 'positioning':
+        setPositioningData(prev => ({ ...prev, ...data }));
+        break;
+      case 'strategy':
+        setStrategyData(prev => ({ ...prev, ...data }));
+        break;
+      case 'revenue':
+        setRevenueData(data);
+        break;
+    }
+  };
 
   // Add this near the top of the BrandStrategyDashboard component, before the return statement
   const Header = () => {
@@ -312,14 +425,7 @@ export default function BrandStrategyDashboard() {
     return iconMap[title as keyof typeof iconMap] || "✨"; // Default icon if not found
   }
 
-  const handleAnalysisComplete = () => {
-    setTimeout(() => {
-      strategyRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      })
-    }, 100) // 500ms = 0.5 seconds
-  }
+  const handleAnalysisComplete = () => {}
 
   useEffect(() => {
     if (scrapedData) {
@@ -333,6 +439,15 @@ export default function BrandStrategyDashboard() {
       setBrandStrategySections(transformedData);
     }
   }, [scrapedData]);
+
+  useEffect(() => {
+    if (Object.keys(analysisData).length > 0) {
+      strategyRef.current?.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  }, [analysisData]); // Dependency on analysisData
 
   return (
 
@@ -375,7 +490,7 @@ export default function BrandStrategyDashboard() {
           <CardContent>
             <div className="flex flex-col items-center space-y-4">
               <InstagramScraper
-                onDataReceived={handleScrapedData}
+                onDataReceived={handleDataReceived}
                 onComplete={handleAnalysisComplete}
               />
               {/* <div className="space-y-2 w-full">
@@ -444,13 +559,13 @@ export default function BrandStrategyDashboard() {
       </motion.div>
 
       {/* Only show the strategy section if we have scraped data */}
-      {scrapedData && (
+      {Object.keys(analysisData).length > 0 && (
         <motion.div
           ref={strategyRef}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-8 space-y-8"  // Added margin-top and space between cards
+          className="mt-8 space-y-8"
         >
           <Card className="border-none shadow-lg bg-gradient-to-br from-purple-50 to-orange-50">
             <CardHeader>
@@ -466,7 +581,7 @@ export default function BrandStrategyDashboard() {
               <div className="mb-8">
                 <h2 className="text-xl font-bold text-purple-600 mb-4">第一步：分析</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {brandStrategySections.filter(section => ['個人風格分析', '目標受眾洞察'].includes(section.title)).map((section, index) => (
+                  {Object.entries(analysisData).map(([title, options], index) => (
                     <motion.div
                       key={index}
                       whileHover={{ scale: 1.05 }}
@@ -477,19 +592,15 @@ export default function BrandStrategyDashboard() {
                         <CardHeader className="pb-2">
                           <CardTitle className="text-lg font-semibold flex items-center justify-between">
                             <span className="flex items-center">
-                              <span className="text-2xl mr-2">{section.icon}</span>
-                              {section.title}
+                              <span className="text-2xl mr-2">{getIconForSection(title)}</span>
+                              {title}
                             </span>
-                            {/* <Button variant="outline" size="sm" className="ml-2">
-                              <Share2 className="h-4 w-4 mr-2" />
-                              分享
-                            </Button> */}
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
                           <Tabs defaultValue="option-1" className="w-full">
                             <TabsList className="grid w-full grid-cols-3">
-                              {section.options.map((_, optionIndex) => (
+                              {(options as any[]).map((option, optionIndex) => (
                                 <TabsTrigger
                                   key={optionIndex}
                                   value={`option-${optionIndex + 1}`}
@@ -498,7 +609,7 @@ export default function BrandStrategyDashboard() {
                                 </TabsTrigger>
                               ))}
                             </TabsList>
-                            {section.options.map((option, optionIndex) => (
+                            {(options as any[]).map((option, optionIndex) => (
                               <TabsContent
                                 key={optionIndex}
                                 value={`option-${optionIndex + 1}`}
@@ -506,16 +617,14 @@ export default function BrandStrategyDashboard() {
                               >
                                 <div className="space-y-2">
                                   {Object.entries(option).map(([key, value]) => {
-                                    // Skip the 'strategy' key since we don't want to display it
                                     if (key === 'strategy') return null;
-
                                     return (
                                       <div key={key} className="mb-4">
                                         <h4 className="font-semibold text-base text-gray-800">
                                           {key}:
                                         </h4>
                                         <p className="text-sm text-gray-600">
-                                          {value}
+                                          {value as string}
                                         </p>
                                       </div>
                                     );
@@ -531,243 +640,243 @@ export default function BrandStrategyDashboard() {
                 </div>
               </div>
               {/* Second section */}
-              <div className="mb-8">
-                <h2 className="text-xl font-bold text-purple-600 mb-4">第二步：定位</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {brandStrategySections.filter(section => ['品牌定位'].includes(section.title)).map((section, index) => (
-                    <motion.div
-                      key={index}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setSelectedCard(null)}
-                    >
-                      <Card className={`cursor-pointer transition-all duration-300 h-full ${selectedCard === index ? 'ring-2 ring-purple-500' : 'hover:shadow-md'}`}>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg font-semibold flex items-center justify-between">
-                            <span className="flex items-center">
-                              <span className="text-2xl mr-2">{section.icon}</span>
-                              {section.title}
-                            </span>
-                            {/* <Button variant="outline" size="sm" className="ml-2">
-                              <Share2 className="h-4 w-4 mr-2" />
-                              分享
-                            </Button> */}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <Tabs defaultValue="option-1" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3">
-                              {section.options.map((_, optionIndex) => (
-                                <TabsTrigger
+              {Object.keys(positioningData).length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-xl font-bold text-purple-600 mb-4">第二步：定位</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(positioningData).map(([title, options], index) => (
+                      <motion.div
+                        key={index}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setSelectedCard(null)}
+                      >
+                        <Card className={`cursor-pointer transition-all duration-300 h-full ${selectedCard === index ? 'ring-2 ring-purple-500' : 'hover:shadow-md'}`}>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-lg font-semibold flex items-center justify-between">
+                              <span className="flex items-center">
+                                <span className="text-2xl mr-2">{getIconForSection(title)}</span>
+                                {title}
+                              </span>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <Tabs defaultValue="option-1" className="w-full">
+                              <TabsList className="grid w-full grid-cols-3">
+                                {(options as any[]).map((_, optionIndex: number) => (
+                                  <TabsTrigger
+                                    key={optionIndex}
+                                    value={`option-${optionIndex + 1}`}
+                                  >
+                                    策略 {optionIndex + 1}
+                                  </TabsTrigger>
+                                ))}
+                              </TabsList>
+                              {(options as any[]).map((option, optionIndex) => (
+                                <TabsContent
                                   key={optionIndex}
                                   value={`option-${optionIndex + 1}`}
+                                  className="mt-4"
                                 >
-                                  策略 {optionIndex + 1}
-                                </TabsTrigger>
+                                  <div className="space-y-2">
+                                    {Object.entries(option).map(([key, value]) => {
+                                      if (key === 'strategy') return null;
+                                      return (
+                                        <div key={key} className="mb-4">
+                                          <h4 className="font-semibold text-base text-gray-800">
+                                            {key}:
+                                          </h4>
+                                          <p className="text-sm text-gray-600">
+                                            {String(value)}
+                                          </p>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </TabsContent>
                               ))}
-                            </TabsList>
-                            {section.options.map((option, optionIndex) => (
-                              <TabsContent
-                                key={optionIndex}
-                                value={`option-${optionIndex + 1}`}
-                                className="mt-4"
-                              >
-                                <div className="space-y-2">
-                                  {Object.entries(option).map(([key, value]) => {
-                                    // Skip the 'strategy' key since we don't want to display it
-                                    if (key === 'strategy') return null;
-
-                                    return (
-                                      <div key={key} className="mb-4">
-                                        <h4 className="font-semibold text-base text-gray-800">
-                                          {key}:
-                                        </h4>
-                                        <p className="text-sm text-gray-600">
-                                          {value}
-                                        </p>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </TabsContent>
-                            ))}
-                          </Tabs>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
+                            </Tabs>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
               {/* Third section */}
-              <div className="mb-8">
-                <h2 className="text-xl font-bold text-purple-600 mb-4">第三步：發想</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {brandStrategySections.filter(section => ['產品策略', '品牌核心理念', '行銷規劃', '品牌聲音', '品牌形象風格'].includes(section.title)).map((section, index) => (
-                    <motion.div
-                      key={index}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setSelectedCard(null)}
-                    >
-                      <Card className={`cursor-pointer transition-all duration-300 h-full ${selectedCard === index ? 'ring-2 ring-purple-500' : 'hover:shadow-md'}`}>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg font-semibold flex items-center justify-between">
-                            <span className="flex items-center">
-                              <span className="text-2xl mr-2">{section.icon}</span>
-                              {section.title}
-                            </span>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <Tabs defaultValue="option-1" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3">
-                              {section.options.map((_, optionIndex) => (
-                                <TabsTrigger
+              {Object.keys(strategyData).length > 0 && (
+                <div className="mb-8">
+                  <h2 className="text-xl font-bold text-purple-600 mb-4">第三步：發想</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(strategyData).map(([title, options], index) => (
+                      <motion.div
+                        key={index}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setSelectedCard(null)}
+                      >
+                        <Card className={`cursor-pointer transition-all duration-300 h-full ${selectedCard === index ? 'ring-2 ring-purple-500' : 'hover:shadow-md'}`}>
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-lg font-semibold flex items-center justify-between">
+                              <span className="flex items-center">
+                                <span className="text-2xl mr-2">{getIconForSection(title)}</span>
+                                {title}
+                              </span>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <Tabs defaultValue="option-1" className="w-full">
+                              <TabsList className="grid w-full grid-cols-3">
+                                {(options as any[]).map((_, optionIndex: number) => (
+                                  <TabsTrigger
+                                    key={optionIndex}
+                                    value={`option-${optionIndex + 1}`}
+                                  >
+                                    策略 {optionIndex + 1}
+                                  </TabsTrigger>
+                                ))}
+                              </TabsList>
+                              {(options as any[]).map((option, optionIndex) => (
+                                <TabsContent
                                   key={optionIndex}
                                   value={`option-${optionIndex + 1}`}
+                                  className="mt-4"
                                 >
-                                  策略 {optionIndex + 1}
-                                </TabsTrigger>
+                                  <div className="space-y-2">
+                                    {Object.entries(option).map(([key, value]) => {
+                                      if (key === 'strategy') return null;
+                                      return (
+                                        <div key={key} className="mb-4">
+                                          <h4 className="font-semibold text-base text-gray-800">
+                                            {key}
+                                          </h4>
+                                          <p className="text-sm text-gray-600">
+                                            {value as string}
+                                          </p>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </TabsContent>
                               ))}
-                            </TabsList>
-                            {section.options.map((option, optionIndex) => (
-                              <TabsContent
-                                key={optionIndex}
-                                value={`option-${optionIndex + 1}`}
-                                className="mt-4"
-                              >
-                                <div className="space-y-2">
-                                  {Object.entries(option).map(([key, value]) => {
-                                    if (key === 'strategy') return null;
-                                    return (
-                                      <div key={key} className="mb-4">
-                                        <h4 className="font-semibold text-base text-gray-800">
-                                          {key}
-                                        </h4>
-                                        <p className="text-sm text-gray-600">
-                                          {value}
-                                        </p>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </TabsContent>
-                            ))}
-                          </Tabs>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
+                            </Tabs>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
               {/* Fourth section */}
-              <div className="mb-8">
-                <h2 className="text-xl font-bold text-purple-600 mb-4">第四步：收益預估</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card className="border-none shadow-lg bg-white">
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl">💰</span>
-                          <CardTitle className="text-xl font-semibold">收益預估</CardTitle>
+              {revenueData && (
+                <div className="mb-8">
+                  <h2 className="text-xl font-bold text-purple-600 mb-4">第四步：收益預估</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card className="border-none shadow-lg bg-white">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl">💰</span>
+                            <CardTitle className="text-xl font-semibold">收益預估</CardTitle>
+                          </div>
+                          <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-orange-500">
+                            {"NTD " + Number(revenueData['收益預估'][0]['潛在每月收益']['收益預估']['計算結果']).toLocaleString('en-US') || 'NTD 0'}
+                          </div>
                         </div>
-                        <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-orange-500">
-                          {"NTD " + Number(scrapedData['收益預估'][0]['潛在每月收益']['收益預估']['計算結果']).toLocaleString('en-US') || 'NTD 0'}
+                        <CardDescription>每月潛在收益</CardDescription>
+                        {Number(revenueData['收益預估'][0]['互動量計算']['總互動數']['計算結果']) === 0 && (
+                          <p className="text-sm text-red-500 mt-1">
+                            若隱藏讚數與留言數，將無法分析互動
+                          </p>
+                        )}
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid gap-2">
+                          <StepSummary
+                            step={1}
+                            title="互動量計算"
+                            result={Number(revenueData['收益預估'][0]['互動量計算']['總互動數']['計算結果']).toLocaleString('en-US')}
+                            formula="總喜歡數 + 總評論數"
+                          >
+                            <div className="space-y-2">
+                              <p className="text-sm text-gray-600">計算所有貼文的總互動量，評估內容的整體影響力。</p>
+                              <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-gray-600">計算公式:</span>
+                                  <span>{"總喜歡數 + 總評論數"}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </StepSummary>
+
+                          <StepSummary
+                            step={2}
+                            title="平均每篇互動率"
+                            result={Number(revenueData['收益預估'][0]['互動量計算']['平均每篇互動率']['計算結果']).toLocaleString('en-US')}
+                            formula="總互動數 ÷ 9 ÷ 追蹤者數量"
+                          >
+                            <div className="space-y-2">
+                              <p className="text-sm text-gray-600">計算平均每篇內容的互動率，評估內容的吸引力。</p>
+                              <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-gray-600">計算公式:</span>
+                                  <span>{"總互動數 ÷ 貼文數 ÷ 追蹤者數量"}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </StepSummary>
+
+                          <StepSummary
+                            step={3}
+                            title="每月潛在銷售量"
+                            result={Number(revenueData['收益預估'][0]['銷售量預估分析']['每月潛在銷售量計算']['計算結果']).toLocaleString('en-US')}
+                            formula="平均每篇貼文互動數 × 假設互動率 5%"
+                          >
+                            <div className="space-y-2">
+                              <p className="text-sm text-gray-600">估算每月可能的銷售量，假設 5% 的互動轉化率。</p>
+                              <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-gray-600">計算公式:</span>
+                                  <span>{"平均每篇貼文互動數 × 假設下單率 5%"}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </StepSummary>
+
+                          <StepSummary
+                            step={4}
+                            title="平均客單價"
+                            result={Number(revenueData['收益預估'][0]['銷售量預估分析']['平均客單價']['假設平均客單價']).toLocaleString('en-US')}
+                            formula=""
+                          >
+                            <p className="text-sm text-gray-600">假設的平均每筆交易金額，基於市場調研及產品定位。</p>
+                          </StepSummary>
+
+                          <StepSummary
+                            step={5}
+                            title="潛在每月收益"
+                            result={"NTD " + Number(revenueData['收益預估'][0]['潛在每月收益']['收益預估']['計算結果']).toLocaleString('en-US')}
+                            formula="每月潛在銷售量 × 平均客單價"
+                          >
+                            <div className="space-y-2">
+                              <p className="text-sm text-gray-600">最終的每月預估收益，基於潛在��售量和平均客單價。</p>
+                              <div className="bg-gray-50 p-3 rounded-lg text-sm">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-gray-600">計算公式:</span>
+                                  <span>{"每月潛在銷售量 × 平均客單價"}</span>
+                                </div>
+                                <div className="mt-2 text-xs text-gray-500">
+                                  {"此收益預估基於當前互動數據及假設的轉換率，幫助理解潛在的市場收益"}
+                                </div>
+                              </div>
+                            </div>
+                          </StepSummary>
                         </div>
-                      </div>
-                      <CardDescription>每月潛在收益</CardDescription>
-                      {Number(scrapedData['收益預估'][0]['互動量計算']['總互動數']['計算結果']) === 0 && (
-                        <p className="text-sm text-red-500 mt-1">
-                          若隱藏讚數與留言數，將無法分析互動
-                        </p>
-                      )}
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-2">
-                        <StepSummary
-                          step={1}
-                          title="互動量計算"
-                          result={Number(scrapedData['收益預估'][0]['互動量計算']['總互動數']['計算結果']).toLocaleString('en-US')}
-                          formula="總喜歡數 + 總評論數"
-                        >
-                          <div className="space-y-2">
-                            <p className="text-sm text-gray-600">計算所有貼文的總互動量，評估內容的整體影響力。</p>
-                            <div className="bg-gray-50 p-3 rounded-lg text-sm">
-                              <div className="flex justify-between items-center">
-                                <span className="text-gray-600">計算公式:</span>
-                                <span>{"總喜歡數 + 總評論數"}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </StepSummary>
-
-                        <StepSummary
-                          step={2}
-                          title="平均每篇互動率"
-                          result={Number(scrapedData['收益預估'][0]['互動量計算']['平均每篇互動率']['計算結果']).toLocaleString('en-US')}
-                          formula="總互動數 ÷ 9 ÷ 追蹤者數量"
-                        >
-                          <div className="space-y-2">
-                            <p className="text-sm text-gray-600">計算平均每篇內容的互動率，評估內容的吸引力。</p>
-                            <div className="bg-gray-50 p-3 rounded-lg text-sm">
-                              <div className="flex justify-between items-center">
-                                <span className="text-gray-600">計算公式:</span>
-                                <span>{"總互動數 ÷ 貼文數 ÷ 追蹤者數量"}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </StepSummary>
-
-                        <StepSummary
-                          step={3}
-                          title="每月潛在銷售量"
-                          result={Number(scrapedData['收益預估'][0]['銷售量預估分析']['每月潛在銷售量計算']['計算結果']).toLocaleString('en-US')}
-                          formula="平均每篇貼文互動數 × 假設互動率 5%"
-                        >
-                          <div className="space-y-2">
-                            <p className="text-sm text-gray-600">估算每月可能的銷售量，假設 5% 的互動轉化率。</p>
-                            <div className="bg-gray-50 p-3 rounded-lg text-sm">
-                              <div className="flex justify-between items-center">
-                                <span className="text-gray-600">計算公式:</span>
-                                <span>{"平均每篇貼文互動數 × 假設下單率 5%"}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </StepSummary>
-
-                        <StepSummary
-                          step={4}
-                          title="平均客單價"
-                          result={Number(scrapedData['收益預估'][0]['銷售量預估分析']['平均客單價']['假設平均客單價']).toLocaleString('en-US')}
-                          formula=""
-                        >
-                          <p className="text-sm text-gray-600">假設的平均每筆交易金額，基於市場調研及產品定位。</p>
-                        </StepSummary>
-
-                        <StepSummary
-                          step={5}
-                          title="潛在每月收益"
-                          result={"NTD " + Number(scrapedData['收益預估'][0]['潛在每月收益']['收益預估']['計算結果']).toLocaleString('en-US')}
-                          formula="每月潛在銷售量 × 平均客單價"
-                        >
-                          <div className="space-y-2">
-                            <p className="text-sm text-gray-600">最終的每月預估收益，基於潛在銷售量和平均客單價。</p>
-                            <div className="bg-gray-50 p-3 rounded-lg text-sm">
-                              <div className="flex justify-between items-center">
-                                <span className="text-gray-600">計算公式:</span>
-                                <span>{"每月潛在銷售量 × 平均客單價"}</span>
-                              </div>
-                              <div className="mt-2 text-xs text-gray-500">
-                                {"此收益預估基於當前互動數據及假設的轉換率，幫助理解潛在的市場收益"}
-                              </div>
-                            </div>
-                          </div>
-                        </StepSummary>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -911,13 +1020,6 @@ export default function BrandStrategyDashboard() {
                   )}
                 </div>
               </label>
-              <input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
               <Button className="bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white font-semibold">
                 提交投票結果
               </Button>
@@ -964,6 +1066,7 @@ function StepSummary({ step, title, result, formula, children }: { step: number,
     </div>
   )
 }
+
 
 
 
