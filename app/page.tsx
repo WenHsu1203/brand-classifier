@@ -119,7 +119,7 @@ const InstagramScraper = ({ onDataReceived, onComplete }: {
       analysisPrompts.forEach(({ key, prompt }) => {
         generateChatGPTResponse(prompt, transformedData, 'gpt-4o-mini')
           .then(res => {
-            const analysisResult = { [key]: res[key] };
+            const analysisResult = { [key]: res[key as keyof typeof res] };
             onDataReceived({ 
               type: 'analysis',
               data: analysisResult 
@@ -149,7 +149,7 @@ const InstagramScraper = ({ onDataReceived, onComplete }: {
           .then(res => {
             onDataReceived({ 
               type: 'positioning',
-              data: { [key]: res[key] } 
+              data: { [key]: res[key as keyof typeof res] } 
             });
           })
           .catch(error => {
@@ -162,7 +162,7 @@ const InstagramScraper = ({ onDataReceived, onComplete }: {
           .then(res => {
             onDataReceived({ 
               type: 'strategy',
-              data: { [key]: res[key] } 
+              data: { [key]: res[key as keyof typeof res] }
             });
           })
           .catch(error => {
