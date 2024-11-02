@@ -10,6 +10,7 @@ import { Instagram, Youtube, Facebook, Share2, Upload, Search, FileText, Share, 
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { InstagramScraper } from "./api/scrape-instagram/instagram_scraper"
+import { Label } from "@/components/ui/label"
 
 
 const StepCard = ({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) => (
@@ -280,18 +281,33 @@ export default function BrandStrategyDashboard() {
       {/* Only show the strategy section if we have scraped data */}
       {Object.keys(analysisData).length > 0 && (
         <div ref={strategyRef}>
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <StrategySection
-              title="分析"
-              data={analysisData}
-              step="第一步：分析"
-            />
+            <div className="space-y-8">
+              <div>
+                <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-orange-500 mb-6">
+                  屬於您的護膚品牌策略
+                </h1>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  基於對您最近9篇Instagram帖子的AI分析，我們為您量身定制了個性化的護膚品牌策略。以下是您的品牌策略概覽，包括品牌定位、目標受眾分析、產品線建議等。這個策略將幫助您輕鬆構想和發展您的個人護膚品牌。請為每個部分選擇您喜歡的選項，並分享給您的粉絲進行投票。
+                </p>
+              </div>
+
+              <div>
+                <StrategySection
+                  title="分析"
+                  data={analysisData}
+                  step="第一步：分析"
+                />
+              </div>
+            </div>
           </motion.div>
         </div>
+
       )}
 
       {Object.keys(analysisData).length > 0 &&
@@ -329,13 +345,27 @@ export default function BrandStrategyDashboard() {
         Object.keys(positioningData).length > 0 &&
         Object.keys(strategyData).length > 0 &&
         revenueData && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-          >
-            <RevenueEstimationSection revenueData={revenueData} />
-          </motion.div>
+          <>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <RevenueEstimationSection revenueData={revenueData} />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              {/* <EmailCollectionSection
+                analysisData={analysisData}
+                positioningData={positioningData}
+                strategyData={strategyData}
+                revenueData={revenueData}
+              /> */}
+            </motion.div>
+          </>
         )}
       {/* Call for action section */}
       <motion.div
@@ -575,3 +605,96 @@ const RevenueEstimationSection = ({ revenueData }: { revenueData: any }) => (
     </CardContent>
   </Card>
 );
+
+// Add this new component
+const EmailCollectionSection = ({
+  analysisData,
+  positioningData,
+  strategyData,
+  revenueData
+}: {
+  analysisData: any,
+  positioningData: any,
+  strategyData: any,
+  revenueData: any
+}) => {
+  const [email, setEmail] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    try {
+      // TODO: Implement API endpoint to handle email submission
+      const response = await fetch('/api/send-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          analysisData,
+          positioningData,
+          strategyData,
+          revenueData
+        }),
+      })
+
+      if (response.ok) {
+        setSubmitStatus('success')
+      } else {
+        setSubmitStatus('error')
+      }
+    } catch (error) {
+      setSubmitStatus('error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <Card className="border-none shadow-lg bg-gradient-to-br from-purple-50 to-orange-50">
+      <CardHeader>
+        <CardTitle className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-orange-500">
+          取得完整分析報告
+        </CardTitle>
+        <CardDescription>
+          請留下您的電子郵件，我們將把完整的分析報告寄送給您
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">電子郵件</Label>
+            <div className="flex gap-2">
+              <Input
+                id="email"
+                type="email"
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1"
+              />
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white"
+              >
+                {isSubmitting ? '傳送中...' : '傳送報告'}
+              </Button>
+            </div>
+          </div>
+          {submitStatus === 'success' && (
+            <p className="text-green-600 text-sm">報告已成功寄出，請查收您的信箱！</p>
+          )}
+          {submitStatus === 'error' && (
+            <p className="text-red-600 text-sm">傳送失敗，請稍後再試。</p>
+          )}
+        </form>
+      </CardContent>
+    </Card>
+  )
+}
