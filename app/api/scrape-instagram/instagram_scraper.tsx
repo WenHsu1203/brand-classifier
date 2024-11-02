@@ -70,6 +70,7 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
                         likes_and_comments: post.like_count + post.comments_count
                     }))
             };
+
             // Create a counter to track completed requests
             let completedAnalysis = 0;
             const totalAnalysis = analysisPrompts.length;
@@ -133,6 +134,24 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
                 type: 'revenue',
                 data: { 收益預估: revenueEstimation }
             });
+
+            // Add Google Sheets logging
+            try {
+                await fetch('/api/log-to-sheets', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: cleanUsername,
+                        followers: transformedData.followers,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+            } catch (sheetError) {
+                console.error('Failed to log to Google Sheets:', sheetError);
+                // Don't throw error to prevent interrupting main flow
+            }
 
         } catch (error) {
             console.error('Error:', error);
