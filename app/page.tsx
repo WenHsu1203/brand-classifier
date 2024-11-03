@@ -703,10 +703,10 @@ const EmailCollectionSection = ({
             </div>
           </div>
           {submitStatus === 'success' && (
-            <p className="text-green-600 text-sm">報告已成功寄出，請查收您的信箱！</p>
+            <p className="text-green-600 text-sm flex justify-center">信件已寄出, 如輸錯信箱將無法收到報告</p>
           )}
           {submitStatus === 'error' && (
-            <p className="text-red-600 text-sm">傳送失敗，請稍後再試</p>
+            <p className="text-red-600 text-sm flex justify-center">傳送失敗，請稍後再試</p>
           )}
         </form>
       </CardContent>
