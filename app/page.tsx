@@ -168,8 +168,8 @@ export default function BrandStrategyDashboard() {
   }
 
   const Hero = () => (
-    <div className="max-w-4xl mx-auto px-4 py-12 bg-white">
-      <CardContent className="pt-6 px-6 pb-8">
+    <div className="max-w-4xl mx-auto px-4 py-2 bg-white">
+      <CardContent className="pt-6 px-6 pb-0">
         <div className="flex items-center justify-center mb-4">
           <Sparkles className="w-8 h-8 text-purple-600 mr-2" />
           <h2 className="text-xl font-semibold text-purple-700">AI 品牌顧問</h2>
@@ -177,13 +177,12 @@ export default function BrandStrategyDashboard() {
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-orange-500 to-purple-600">
           幫你從0打造自己的保養品牌
         </h1>
-        <div className="flex items-center justify-center mb-6">
+        <div className="flex items-center justify-center mb-4">
           <Instagram className="w-6 h-6 text-orange-500 mr-2" />
           <span className="text-lg font-medium text-gray-700">適用於 Instagram</span>
         </div>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto text-center">
-          還沒有自己的品牌？別擔心！我們的 AI 助手幫你從零開始，一鍵搞定品牌策略。
-          輕鬆上手，創建屬於自己的護膚品牌，不僅能展現你的風格，還有機會轉粉絲為收益！
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto text-center mb-0">
+          想創立品牌，卻不知道怎麼開始？別擔心！交給 AI 品牌顧問！透過分析你的 Instagram 內容生成 8 大面向品牌策略報告書，不僅展現你的風格，還幫你流量變現！
         </p>
       </CardContent>
     </div>
@@ -555,7 +554,7 @@ const RevenueEstimationSection = ({ revenueData }: { revenueData: any }) => (
                 formula="總互動數 ÷ 9 ÷ 追蹤者數量"
               >
                 <div className="space-y-2">
-                  <p className="text-sm text-gray-600">計算平均每篇內容的互動率，評估內容���吸引力。</p>
+                  <p className="text-sm text-gray-600">計算平均每篇內容的互動率，評估內容吸引力。</p>
                   <div className="bg-gray-50 p-3 rounded-lg text-sm">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">計算公式:</span>
