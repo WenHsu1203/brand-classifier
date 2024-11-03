@@ -41,6 +41,7 @@ export default function BrandStrategyDashboard() {
   const [positioningData, setPositioningData] = useState({});
   const [strategyData, setStrategyData] = useState({});
   const [revenueData, setRevenueData] = useState(null);
+  const [cleanUsername, setCleanUsername] = useState<string>('');
   const strategyRef = useRef<HTMLDivElement>(null)
   const nextStepsRef = useRef<HTMLDivElement>(null)
   const aiGeneratorRef = useRef<HTMLDivElement>(null)
@@ -59,10 +60,11 @@ export default function BrandStrategyDashboard() {
     }
   }, [analysisData]);
 
-  const handleDataReceived = ({ type, data }: { type: string, data: any }) => {
+  const handleDataReceived = ({ type, data, username }: { type: string, data: any, username?: string }) => {
     switch (type) {
       case 'analysis':
         setAnalysisData(prev => ({ ...prev, ...data }));
+        if (username) setCleanUsername(username);
         break;
       case 'positioning':
         setPositioningData(prev => ({ ...prev, ...data }));
@@ -271,7 +273,7 @@ export default function BrandStrategyDashboard() {
               <StepCard
                 icon={FileCheck}
                 title="步驟 3: 生成最終品牌策略"
-                description="點擊「聯絡我們」，我們將根據您的策略生成最終的品牌策略。"
+                description="點擊「聯��我們」，我們將根據您的策略生成最終的品牌策略。"
               />
             </div>
           </CardContent>
@@ -358,12 +360,13 @@ export default function BrandStrategyDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-              {/* <EmailCollectionSection
+              <EmailCollectionSection
                 analysisData={analysisData}
                 positioningData={positioningData}
                 strategyData={strategyData}
                 revenueData={revenueData}
-              /> */}
+                username={cleanUsername}
+              />
             </motion.div>
           </>
         )}
@@ -611,12 +614,14 @@ const EmailCollectionSection = ({
   analysisData,
   positioningData,
   strategyData,
-  revenueData
+  revenueData,
+  username
 }: {
   analysisData: any,
   positioningData: any,
   strategyData: any,
-  revenueData: any
+  revenueData: any,
+  username: string
 }) => {
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -638,7 +643,8 @@ const EmailCollectionSection = ({
           analysisData,
           positioningData,
           strategyData,
-          revenueData
+          revenueData,
+          username
         }),
       })
 
@@ -661,7 +667,9 @@ const EmailCollectionSection = ({
           取得完整分析報告
         </CardTitle>
         <CardDescription>
-          請留下您的電子郵件，我們將把完整的分析報告寄送給您
+          <p className="text-xl text-gray-600 leading-relaxed">
+            請留下您的電子郵件，我們將把完整的分析報告寄送給您
+          </p>
         </CardDescription>
       </CardHeader>
       <CardContent>

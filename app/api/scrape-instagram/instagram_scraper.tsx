@@ -42,7 +42,7 @@ const strategyPrompts = [
 
 
 interface InstagramScraperProps {
-    onDataReceived: (data: { type: string; data: any }) => void;
+    onDataReceived: (data: { type: string; data: any; username?: string }) => void;
 }
 
 export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
@@ -122,7 +122,8 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
                             const analysisResult = { [key]: res[key as keyof typeof res] };
                             onDataReceived({
                                 type: 'analysis',
-                                data: analysisResult
+                                data: analysisResult,
+                                username: cleanUsername
                             });
 
                             // Increment counter and check if all analysis is complete
