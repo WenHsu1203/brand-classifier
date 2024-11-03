@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Instagram, Youtube, Facebook, Share2, Upload, Search, FileText, Share, Upload as UploadIcon, FileCheck, Menu, ChevronUp, ChevronDown } from "lucide-react"
+import { Instagram, Youtube, Facebook, Share2, Upload, Search, FileText, Share, Upload as UploadIcon, FileCheck, Menu, ChevronUp, ChevronDown, Sparkles } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { InstagramScraper } from "./api/scrape-instagram/instagram_scraper"
@@ -168,17 +168,25 @@ export default function BrandStrategyDashboard() {
   }
 
   const Hero = () => (
-    <><h1 className="text-4xl md:text-6xl font-bold mb-6">
-      <span className="text-purple-600">品牌大師</span> - 終極 AI 品牌生成器
-      <br className="hidden md:block" />
-      適用於{" "}
-      <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-orange-500">
-        Instagram
-      </span>
-    </h1><p className="text-gray-600 text-lg md:text-xl max-w-3xl mx-auto mb-8">
-        還沒有自己的品牌？別擔心！品牌大師幫你從零開始，AI 一鍵搞定品牌策略。輕鬆上手，創建屬於自己的護膚品牌，不僅能展現你的風格，還有機會轉粉絲為收益！
-      </p>
-    </>
+    <div className="max-w-4xl mx-auto px-4 py-12 bg-white">
+      <CardContent className="pt-6 px-6 pb-8">
+        <div className="flex items-center justify-center mb-4">
+          <Sparkles className="w-8 h-8 text-purple-600 mr-2" />
+          <h2 className="text-xl font-semibold text-purple-700">AI 品牌顧問</h2>
+        </div>
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-orange-500 to-purple-600">
+          幫你從0打造自己的保養品牌
+        </h1>
+        <div className="flex items-center justify-center mb-6">
+          <Instagram className="w-6 h-6 text-orange-500 mr-2" />
+          <span className="text-lg font-medium text-gray-700">適用於 Instagram</span>
+        </div>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto text-center">
+          還沒有自己的品牌？別擔心！我們的 AI 助手幫你從零開始，一鍵搞定品牌策略。
+          輕鬆上手，創建屬於自己的護膚品牌，不僅能展現你的風格，還有機會轉粉絲為收益！
+        </p>
+      </CardContent>
+    </div>
   );
 
   const CallToAction = () => (
@@ -228,8 +236,9 @@ export default function BrandStrategyDashboard() {
         <Card className="border-none shadow-lg bg-gradient-to-r from-purple-100 to-orange-100">
           <CardHeader>
             <CardTitle className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-orange-500 text-center">
-              護膚品牌策略 AI 產生器
+              保養品牌策略 AI 產生器
             </CardTitle>
+            <p className="text-lg text-gray-700 text-center">請輸入您的 Instagram 帳號</p>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col items-center space-y-4">
@@ -256,7 +265,7 @@ export default function BrandStrategyDashboard() {
           <CardContent>
             <div className="text-center mb-6">
               <p className="text-lg text-gray-700">
-                這款產品結合專業策略與粉絲反饋，為您打造專屬的品牌手冊，確保品牌是粉絲所愛且需要的產品。
+                AI 品牌顧問結合專業策略與粉絲回饋，為您打造專屬的品牌策略報告書，確保打造出的品牌也會是粉絲所愛所需！
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
@@ -272,8 +281,8 @@ export default function BrandStrategyDashboard() {
               />
               <StepCard
                 icon={FileCheck}
-                title="步驟 3: 生成最終品牌策略"
-                description="點擊「聯��我們」，我們將根據您的策略生成最終的品牌策略。"
+                title="步驟 3: 優化 ＆ 執行品牌策略"
+                description="點擊「聯絡我們」，助您優化，並讓品牌策略可以落地執行。"
               />
             </div>
           </CardContent>
@@ -546,7 +555,7 @@ const RevenueEstimationSection = ({ revenueData }: { revenueData: any }) => (
                 formula="總互動數 ÷ 9 ÷ 追蹤者數量"
               >
                 <div className="space-y-2">
-                  <p className="text-sm text-gray-600">計算平均每篇內容的互動率，評估內容的吸引力。</p>
+                  <p className="text-sm text-gray-600">計算平均每篇內容的互動率，評估內容���吸引力。</p>
                   <div className="bg-gray-50 p-3 rounded-lg text-sm">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">計算公式:</span>
@@ -563,7 +572,7 @@ const RevenueEstimationSection = ({ revenueData }: { revenueData: any }) => (
                 formula="平均每篇貼文互動數 × 假設互動率 5%"
               >
                 <div className="space-y-2">
-                  <p className="text-sm text-gray-600">估算每月可能的銷售量，假設 5% 的互動轉化率。</p>
+                  <p className="text-sm text-gray-600">估算每月可能的銷售量，假設 5% 的互動化率。</p>
                   <div className="bg-gray-50 p-3 rounded-lg text-sm">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">計算公式:</span>
@@ -667,16 +676,15 @@ const EmailCollectionSection = ({
           取得完整分析報告
         </CardTitle>
         <CardDescription>
-          <p className="text-xl text-gray-600 leading-relaxed">
+          <p className="text-lg text-gray-600 leading-relaxed flex justify-center">
             請留下您的電子郵件，我們將把完整的分析報告寄送給您
           </p>
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">電子郵件</Label>
-            <div className="flex gap-2">
+          <div className="space-y-2 flex flex-col items-center">
+            <div className="flex gap-2 justify-center">
               <Input
                 id="email"
                 type="email"
@@ -684,12 +692,12 @@ const EmailCollectionSection = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="flex-1"
+                className="w-[300px] border-2 border-purple-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg py-6"
               />
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white"
+                className="w-[120px] bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white font-semibold whitespace-nowrap px-8 py-6"
               >
                 {isSubmitting ? '傳送中...' : '傳送報告'}
               </Button>
@@ -699,7 +707,7 @@ const EmailCollectionSection = ({
             <p className="text-green-600 text-sm">報告已成功寄出，請查收您的信箱！</p>
           )}
           {submitStatus === 'error' && (
-            <p className="text-red-600 text-sm">傳送失敗，請稍後再試。</p>
+            <p className="text-red-600 text-sm">傳送失敗，請稍後再試</p>
           )}
         </form>
       </CardContent>
