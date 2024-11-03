@@ -683,7 +683,7 @@ const EmailCollectionSection = ({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2 flex flex-col items-center">
-            <div className="flex gap-2 justify-center">
+            <div className="flex flex-col sm:flex-row gap-2 justify-center w-full">
               <Input
                 id="email"
                 type="email"
@@ -691,12 +691,12 @@ const EmailCollectionSection = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-[300px] border-2 border-purple-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg py-6"
+                className="w-full sm:w-[300px] border-2 border-purple-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent text-base sm:text-lg py-4 sm:py-6"
               />
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-[120px] bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white font-semibold whitespace-nowrap px-8 py-6"
+                className="w-full sm:w-[120px] bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white font-semibold whitespace-nowrap px-4 sm:px-8 py-4 sm:py-6"
               >
                 {isSubmitting ? '傳送中...' : '傳送報告'}
               </Button>
