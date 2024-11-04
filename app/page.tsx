@@ -164,7 +164,7 @@ const shareToInstagram = async (elementRef: HTMLElement) => {
     const dataUrl = canvas.toDataURL('image/png');
     // Check if device is iOS
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    
+    s
     if (navigator.share && !isIOS) {
       // For Android and other devices that support file sharing
       console.log('Using native share with file...');
