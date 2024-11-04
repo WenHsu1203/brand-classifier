@@ -44,18 +44,21 @@ const shareToInstagram = async (elementRef: HTMLElement) => {
     // Create a clone of the element to capture
     const clone = elementRef.cloneNode(true) as HTMLElement;
     
+    // Determine if we're on mobile
+    const isMobile = window.innerWidth <= 768;
+    
     // Create a temporary container with fixed styling
     const container = document.createElement('div');
     container.style.cssText = `
       position: fixed;
       left: -9999px;
       top: -9999px;
-      width: 800px;
+      width: ${isMobile ? '400px' : '800px'};
       background: white;
-      padding: 40px;
+      padding: ${isMobile ? '20px' : '40px'};
       border-radius: 16px;
       z-index: -1;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: none;
     `;
     
     // Add the clone to the temporary container
@@ -71,7 +74,17 @@ const shareToInstagram = async (elementRef: HTMLElement) => {
       height: auto;
       transform: none !important;
       transition: none !important;
+      font-size: ${isMobile ? '14px' : '16px'};
+      border: none;
+      box-shadow: none;
     `;
+
+    // Remove borders and shadows from all cards within the clone
+    const cards = clone.querySelectorAll('.card, [class*="shadow"]');
+    cards.forEach((card: Element) => {
+      (card as HTMLElement).style.border = 'none';
+      (card as HTMLElement).style.boxShadow = 'none';
+    });
 
     // Ensure all tabs content is visible
     const tabsContents = clone.querySelectorAll('[role="tabpanel"]');
@@ -86,10 +99,10 @@ const shareToInstagram = async (elementRef: HTMLElement) => {
     
     const canvas = await html2canvas(clone, {
       backgroundColor: '#ffffff',
-      scale: 2,
+      scale: isMobile ? 1.5 : 2, // Adjust scale based on device
       logging: true,
       useCORS: true,
-      width: 800,
+      width: isMobile ? 400 : 800, // Match container width
       height: clone.offsetHeight,
       onclone: (clonedDoc) => {
         // Additional styling fixes in the cloned document if needed
