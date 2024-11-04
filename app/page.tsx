@@ -10,7 +10,7 @@ import { Instagram, Youtube, Facebook, Share2, Upload, Search, FileText, Share, 
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { InstagramScraper } from "./api/scrape-instagram/instagram_scraper"
-import { Label } from "@/components/ui/label"
+import html2canvas from 'html2canvas';
 
 
 const StepCard = ({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description: string }) => (
@@ -35,6 +35,98 @@ const getIconForSection = (title: string): string => {
   } as const;
   return iconMap[title as keyof typeof iconMap] || "✨"; // Default icon if not found
 }
+
+const shareToInstagram = async (elementRef: HTMLElement) => {
+  try {
+    console.log('Starting share process...', elementRef);
+    const html2canvas = (await import('html2canvas')).default;
+    
+    // Create a clone of the element to capture
+    const clone = elementRef.cloneNode(true) as HTMLElement;
+    
+    // Create a temporary container with fixed styling
+    const container = document.createElement('div');
+    container.style.cssText = `
+      position: fixed;
+      left: -9999px;
+      top: -9999px;
+      width: 800px;
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      z-index: -1;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    `;
+    
+    // Add the clone to the temporary container
+    container.appendChild(clone);
+    document.body.appendChild(container);
+    
+    // Apply specific styles to the clone
+    clone.style.cssText = `
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      width: 100%;
+      height: auto;
+      transform: none !important;
+      transition: none !important;
+    `;
+
+    // Ensure all tabs content is visible
+    const tabsContents = clone.querySelectorAll('[role="tabpanel"]');
+    tabsContents.forEach((content: Element) => {
+      (content as HTMLElement).style.display = 'block';
+      (content as HTMLElement).style.opacity = '1';
+      (content as HTMLElement).style.visibility = 'visible';
+    });
+
+    // Remove any hover/animation classes
+    clone.classList.remove('hover:scale-105', 'transform', 'transition-all');
+    
+    const canvas = await html2canvas(clone, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      logging: true,
+      useCORS: true,
+      width: 800,
+      height: clone.offsetHeight,
+      onclone: (clonedDoc) => {
+        // Additional styling fixes in the cloned document if needed
+        const clonedElement = clonedDoc.body.querySelector('.strategy-card');
+        if (clonedElement) {
+          (clonedElement as HTMLElement).style.opacity = '1';
+          (clonedElement as HTMLElement).style.transform = 'none';
+        }
+      }
+    });
+    
+    // Clean up - remove the temporary container
+    document.body.removeChild(container);
+    
+    console.log('Canvas created successfully');
+    const dataUrl = canvas.toDataURL('image/png');
+    
+    if (navigator.share) {
+      console.log('Using native share...');
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], 'brand-strategy.png', { type: 'image/png' });
+      await navigator.share({
+        files: [file],
+        title: '我的品牌策略',
+        text: '由 AI 品牌顧問產生的品牌策略'
+      });
+    } else {
+      console.log('Falling back to download...');
+      const link = document.createElement('a');
+      link.download = 'brand-strategy.png';
+      link.href = dataUrl;
+      link.click();
+    }
+  } catch (error) {
+    console.error('Error in shareToInstagram:', error);
+  }
+};
 
 export default function BrandStrategyDashboard() {
   const [analysisData, setAnalysisData] = useState({});
@@ -182,7 +274,7 @@ export default function BrandStrategyDashboard() {
           <span className="text-lg font-medium text-gray-700">適用於 Instagram</span>
         </div>
         <p className="text-lg text-gray-600 max-w-2xl mx-auto text-center mb-0">
-          想創立品牌，卻不知道怎麼開始？別擔心！交給 AI 品牌顧問！透過分析你的 Instagram 內容生成 8 大面向品牌策略報告書，不僅展現你的風格，還幫你流量變現！
+          想創立品牌，卻不知道怎麼開始？別擔心！交給 AI 品牌顧問！透過分析你的 Instagram 內容生成 8 大面向品牌策略報告書，不僅展現你的風格，還幫你量變現！
         </p>
       </CardContent>
     </div>
@@ -446,13 +538,57 @@ const StrategySection = ({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Card className={`cursor-pointer transition-all duration-300 h-full`}>
+            <Card className={`cursor-pointer transition-all duration-300 h-full strategy-card`}>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg font-semibold flex items-center justify-between">
                   <span className="flex items-center">
                     <span className="text-2xl mr-2">{getIconForSection(sectionTitle)}</span>
                     {sectionTitle}
                   </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="
+                      group
+                      relative
+                      flex items-center
+                      px-4 py-2
+                      text-purple-600
+                      bg-purple-50/50
+                      hover:bg-purple-100
+                      rounded-full
+                      transition-all
+                      duration-300
+                      ease-in-out
+                      transform
+                      hover:scale-105
+                      hover:shadow-md
+                      active:scale-95
+                    "
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const cardElement = e.currentTarget.closest('.strategy-card');
+                      if (cardElement) {
+                        shareToInstagram(cardElement as HTMLElement);
+                      }
+                    }}
+                  >
+                    <Share2 className="
+                      w-4 h-4 mr-2
+                      group-hover:rotate-12
+                      transition-transform
+                      duration-300
+                    " />
+                    <span className="
+                      font-medium
+                      group-hover:text-purple-700
+                      transition-colors
+                      duration-300
+                    ">
+                      分享
+                    </span>
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -510,15 +646,17 @@ const RevenueEstimationSection = ({ revenueData }: { revenueData: any }) => (
     </CardHeader>
     <CardContent>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="border-none shadow-lg bg-white">
+        <Card className="border-none shadow-lg bg-white revenue-card">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-2xl">💰</span>
                 <CardTitle className="text-xl font-semibold">收益預估</CardTitle>
               </div>
-              <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-orange-500">
-                {"NTD " + Number(revenueData['收益預估'][0]['潛在每月收益']['收益預估']['計算結果']).toLocaleString('en-US') || 'NTD 0'}
+              <div className="flex items-center gap-2">
+                <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-orange-500">
+                  {"NTD " + Number(revenueData['收益預估'][0]['潛在每月收益']['收益預估']['計算結果']).toLocaleString('en-US') || 'NTD 0'}
+                </div>
               </div>
             </div>
             <CardDescription>每月潛在收益</CardDescription>
