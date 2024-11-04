@@ -83,7 +83,7 @@ export const EmailCollectionSection = ({
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full sm:w-[120px] bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white font-semibold whitespace-nowrap px-4 sm:px-8 py-4 sm:py-6"
+                className="bg-gradient-to-r from-purple-500 to-orange-500 hover:from-purple-600 hover:to-orange-600 text-white font-semibold"
               >
                 {isSubmitting ? '傳送中...' : '傳送報告'}
               </Button>

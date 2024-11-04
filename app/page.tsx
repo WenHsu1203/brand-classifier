@@ -9,6 +9,7 @@ import { CallToAction } from "./components/CallToAction"
 import { Navbar } from "./components/Navbar"
 import { StepsSection } from "@/components/StepsSection"
 import { AIGenerator } from "@/components/AIGenerator"
+import { StrategySummary } from "@/components/StrategySummary"
 
 export default function BrandStrategyDashboard() {
   const [analysisData, setAnalysisData] = useState({});
@@ -149,6 +150,18 @@ export default function BrandStrategyDashboard() {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <RevenueEstimationSection revenueData={revenueData} />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <StrategySummary
+                analysisData={analysisData}
+                positioningData={positioningData}
+                strategyData={strategyData}
+                revenueData={revenueData}
+              />
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
