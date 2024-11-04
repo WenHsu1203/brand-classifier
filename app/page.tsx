@@ -357,7 +357,7 @@ export default function BrandStrategyDashboard() {
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center text-center">
         <p className="text-lg mb-6 text-gray-600">
-          有興創建自己的品牌嗎？立即預約 15 分鐘免費詢！目前僅限粉絲數超過 3 萬的帳號預約
+          有興創建自己的品牌嗎？立即預約 15 分鐘免費諮詢！目前僅限粉絲數超過 3 萬的帳號預約
         </p>
         <div className="flex justify-center">
           <Button
