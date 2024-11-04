@@ -613,7 +613,7 @@ const StrategySection = ({
                     <span className="text-2xl mr-2">{getIconForSection(sectionTitle)}</span>
                     {sectionTitle}
                   </span>
-                  <Button
+                  {/* <Button
                     variant="ghost"
                     size="sm"
                     className="
@@ -656,7 +656,7 @@ const StrategySection = ({
                     ">
                       分享
                     </span>
-                  </Button>
+                  </Button> */}
                 </CardTitle>
               </CardHeader>
               <CardContent>
