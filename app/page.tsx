@@ -162,9 +162,12 @@ const shareToInstagram = async (elementRef: HTMLElement) => {
     
     console.log('Canvas created successfully');
     const dataUrl = canvas.toDataURL('image/png');
+    // Check if device is iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     
-    if (navigator.share) {
-      console.log('Using native share...');
+    if (navigator.share && !isIOS) {
+      // For Android and other devices that support file sharing
+      console.log('Using native share with file...');
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], 'brand-strategy.png', { type: 'image/png' });
       await navigator.share({
@@ -172,7 +175,16 @@ const shareToInstagram = async (elementRef: HTMLElement) => {
         title: '我的品牌策略',
         text: '由 AI 品牌顧問產生的品牌策略'
       });
+    } else if (navigator.share && isIOS) {
+      // For iOS devices, share only the text and a link
+      console.log('Using iOS share...');
+      await navigator.share({
+        title: '我的品牌策略',
+        text: '由 AI 品牌顧問產生的品牌策略',
+        url: window.location.href
+      });
     } else {
+      // Fallback to download
       console.log('Falling back to download...');
       const link = document.createElement('a');
       link.download = 'brand-strategy.png';
@@ -345,7 +357,7 @@ export default function BrandStrategyDashboard() {
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center text-center">
         <p className="text-lg mb-6 text-gray-600">
-          有興創建自己的品牌嗎？立即預約 15 分鐘免費���詢！目前僅限粉絲數超過 3 萬的帳號預約
+          有興創建自己的品牌嗎？立即預約 15 分鐘免費詢！目前僅限粉絲數超過 3 萬的帳號預約
         </p>
         <div className="flex justify-center">
           <Button
@@ -601,7 +613,7 @@ const StrategySection = ({
                     <span className="text-2xl mr-2">{getIconForSection(sectionTitle)}</span>
                     {sectionTitle}
                   </span>
-                  {/* <Button
+                  <Button
                     variant="ghost"
                     size="sm"
                     className="
@@ -644,7 +656,7 @@ const StrategySection = ({
                     ">
                       分享
                     </span>
-                  </Button> */}
+                  </Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>
