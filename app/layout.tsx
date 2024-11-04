@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: '護膚品牌策略 AI 產生器',
-  description: '護膚品牌策略 AI 產生器 - 讓 AI 幫你打造專屬品牌策略',
+  title: '保養品牌策略 AI 產生器',
+  description: '保養品牌策略 AI 產生器 - 讓 AI 幫你打造專屬品牌策略',
   icons: {
     icon: 'https://drive.google.com/uc?export=view&id=1X9XNqxrkSKDB1aAmR3WhLrjPai7bxNso', // Put your favicon file in the public folder
     // You can also use PNG:
