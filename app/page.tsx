@@ -79,11 +79,52 @@ const shareToInstagram = async (elementRef: HTMLElement) => {
       box-shadow: none;
     `;
 
-    // Remove borders and shadows from all cards within the clone
+    // Fix header spacing
+    const header = clone.querySelector('.flex.items-center.justify-between');
+    if (header) {
+      (header as HTMLElement).style.cssText = `
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0;
+        padding: 0;
+      `;
+    }
+
+    // Fix title and icon spacing
+    const title = clone.querySelector('h3, .text-lg');
+    if (title) {
+      (title as HTMLElement).style.marginTop = '0';
+    }
+
+    // Fix share button position
+    const shareButton = clone.querySelector('.分享');
+    if (shareButton) {
+      (shareButton as HTMLElement).style.marginTop = '0';
+    }
+
+    // Fix tabs spacing
+    const tabsList = clone.querySelector('[role="tablist"]');
+    if (tabsList) {
+      (tabsList as HTMLElement).style.cssText = `
+        margin: 8px 0;
+        padding: 4px;
+        background: #f3f4f6;
+        border-radius: 8px;
+      `;
+    }
+
+    // Remove borders and shadows from all cards
     const cards = clone.querySelectorAll('.card, [class*="shadow"]');
     cards.forEach((card: Element) => {
       (card as HTMLElement).style.border = 'none';
       (card as HTMLElement).style.boxShadow = 'none';
+    });
+
+    // Fix content spacing
+    const contentSections = clone.querySelectorAll('h4, p');
+    contentSections.forEach((section: Element) => {
+      (section as HTMLElement).style.margin = '8px 0';
     });
 
     // Ensure all tabs content is visible
@@ -92,6 +133,8 @@ const shareToInstagram = async (elementRef: HTMLElement) => {
       (content as HTMLElement).style.display = 'block';
       (content as HTMLElement).style.opacity = '1';
       (content as HTMLElement).style.visibility = 'visible';
+      (content as HTMLElement).style.margin = '0';
+      (content as HTMLElement).style.padding = '0';
     });
 
     // Remove any hover/animation classes
@@ -302,7 +345,7 @@ export default function BrandStrategyDashboard() {
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center text-center">
         <p className="text-lg mb-6 text-gray-600">
-          有興創建自己的品牌嗎？立即預約 15 分鐘免費諮詢！目前僅限粉絲數超過 3 萬的帳號預約
+          有興創建自己的品牌嗎？立即預約 15 分鐘免費���詢！目前僅限粉絲數超過 3 萬的帳號預約
         </p>
         <div className="flex justify-center">
           <Button
@@ -558,7 +601,7 @@ const StrategySection = ({
                     <span className="text-2xl mr-2">{getIconForSection(sectionTitle)}</span>
                     {sectionTitle}
                   </span>
-                  <Button
+                  {/* <Button
                     variant="ghost"
                     size="sm"
                     className="
@@ -601,7 +644,7 @@ const StrategySection = ({
                     ">
                       分享
                     </span>
-                  </Button>
+                  </Button> */}
                 </CardTitle>
               </CardHeader>
               <CardContent>
