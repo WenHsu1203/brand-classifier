@@ -189,14 +189,24 @@ export function StrategySummary({
                     const image = canvas.toDataURL("image/png")
 
                     if (navigator.share) {
-                      const blob = await (await fetch(image)).blob()
-                      const file = new File([blob], 'strategy-summary.png', { type: 'image/png' })
-
-                      await navigator.share({
-                        title: 'AI 品牌顧問策略分析',
-                        text: '查看我的品牌策略分析結果！',
-                        files: [file]
-                      })
+                      try {
+                        // Try file sharing first
+                        const blob = await (await fetch(image)).blob()
+                        const file = new File([blob], 'strategy-summary.png', { type: 'image/png' })
+                        
+                        await navigator.share({
+                          title: 'AI 品牌顧問策略分析',
+                          text: '查看我的品牌策略分析結果！',
+                          files: [file]
+                        })
+                      } catch (error) {
+                        console.error('Sharing failed:', error)
+                        // Fallback to download if sharing fails
+                        const link = document.createElement("a")
+                        link.href = image
+                        link.download = "strategy-summary.png"
+                        link.click()
+                      }
                     } else {
                       const link = document.createElement("a")
                       link.href = image
