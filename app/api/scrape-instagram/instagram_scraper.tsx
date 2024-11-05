@@ -102,7 +102,7 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
                     // Check for rate limit error
                     if (account_info.json_data.error?.type === 'OAuthException' && 
                         account_info.json_data.error?.code === 4) {
-                        throw new Error('已達到 API 使用上限，請稍後再試 🥲\n想要測試可私訊@iamqhsin');
+                        throw new Error('這個小時已達到使用上限，請稍後再試 🥲\n想要測試可私訊@iamqhsin');
                     }
 
                     if (account_info.json_data.error) {
