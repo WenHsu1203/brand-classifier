@@ -56,6 +56,7 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
         setError(null);
 
         try {
+
             // Check for dummy data request
             if (account === '@@') {
                 // Send analysis data
@@ -94,26 +95,54 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
             } else {
                 // Strip @ symbol if it exists
                 const cleanUsername = account.startsWith('@') ? account.substring(1) : account;
-                // Fire-and-forget logging to Google Sheets
-                fetch('/api/log-to-sheets', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        username: cleanUsername,
-                        followers: 0,
-                        timestamp: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })
-                    })
-                }).catch(sheetError => {
-                    console.error('Failed to log to Google Sheets:', sheetError);
-                    // Error is caught but won't block the main flow
-                });
-                throw new Error('這個小時已達到使用上限，請稍後再試 🥲 想要測試可點開右下角對話框留下你的ig 帳號！');
 
 
-                // Add rate limit check
                 try {
+                    // Start timing
+                    const startTime = performance.now();
+
+                    const response = await fetch('/api/get-from-sheets', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error('Sheets API Error Details:', errorData);
+                        throw new Error(errorData.error || 'Failed to fetch from Google Sheets');
+                    }
+
+                    const sheetsData = await response.json();
+                    if (sheetsData.data[1] == "0") {
+                        // Calculate time spent
+                        const endTime = performance.now();
+                        const timeSpent = endTime - startTime;
+                        console.log(`Time spent checking sheets status: ${timeSpent.toFixed(2)}ms`);
+
+                        // Fire-and-forget logging to Google Sheets
+                        fetch('/api/log-to-sheets', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                username: cleanUsername,
+                                followers: 0,
+                                timestamp: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),
+                            })
+                        }).catch(sheetError => {
+                            console.error('Failed to log to Google Sheets:', sheetError);
+                        });
+                        throw new Error('系統維護中, 想要測試可點開右下角對話框留下你的ig 帳號！');
+                    }
+
+                    // If we reach here (system is enabled), also log the time
+                    const endTime = performance.now();
+                    const timeSpent = endTime - startTime;
+                    console.log(`Time spent checking sheets status: ${timeSpent.toFixed(2)}ms`);
+
                     const account_info = await getAccountInfo(creds, cleanUsername);
 
 
