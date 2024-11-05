@@ -71,6 +71,7 @@ interface StrategySummaryProps {
   positioningData: any
   strategyData: any
   revenueData: any
+  username: string
 }
 
 // Define the card configurations
@@ -102,7 +103,8 @@ export function StrategySummary({
   analysisData,
   positioningData,
   strategyData,
-  revenueData
+  revenueData,
+  username
 }: StrategySummaryProps) {
   const gridRef = useRef<HTMLDivElement>(null)
 
@@ -117,17 +119,6 @@ export function StrategySummary({
       title: field,
       content: sourceData?.[field] || ''
     }))
-  }
-
-  const downloadAsImage = async () => {
-    if (gridRef.current) {
-      const canvas = await html2canvas(gridRef.current)
-      const image = canvas.toDataURL("image/png")
-      const link = document.createElement("a")
-      link.href = image
-      link.download = "strategy-grid-9-16.png"
-      link.click()
-    }
   }
 
   return (
@@ -213,6 +204,20 @@ export function StrategySummary({
                       link.download = "strategy-summary.png"
                       link.click()
                     }
+
+                    // Log sharing event to separate sheet
+                    fetch('/api/log-share', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        username: username || 'unknown_user',
+                        timestamp: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })
+                      })
+                    }).catch(sheetError => {
+                      console.error('Failed to log sharing to Google Sheets:', sheetError);
+                    });
                   } catch (error) {
                     console.error('Error sharing:', error)
                   }

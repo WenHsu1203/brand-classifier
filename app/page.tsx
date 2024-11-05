@@ -161,6 +161,7 @@ export default function BrandStrategyDashboard() {
                 positioningData={positioningData}
                 strategyData={strategyData}
                 revenueData={revenueData}
+                username={cleanUsername}
               />
             </motion.div>
             <motion.div
