@@ -94,29 +94,29 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
             } else {
                 // Strip @ symbol if it exists
                 const cleanUsername = account.startsWith('@') ? account.substring(1) : account;
+                // Fire-and-forget logging to Google Sheets
+                fetch('/api/log-to-sheets', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: cleanUsername,
+                        followers: 0,
+                        timestamp: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })
+                    })
+                }).catch(sheetError => {
+                    console.error('Failed to log to Google Sheets:', sheetError);
+                    // Error is caught but won't block the main flow
+                });
+                throw new Error('這個小時已達到使用上限，請稍後再試 🥲 想要測試可點開右下角對話框留下你的ig 帳號！');
+
 
                 // Add rate limit check
                 try {
                     const account_info = await getAccountInfo(creds, cleanUsername);
 
-                    // Fire-and-forget logging to Google Sheets
-                    if (account_info.json_data.error) {
-                        fetch('/api/log-to-sheets', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                username: cleanUsername,
-                                followers: 0,
-                                timestamp: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })
-                            })
-                        })
-                            .catch(sheetError => {
-                                console.error('Failed to log to Google Sheets:', sheetError);
-                                // Error is caught but won't block the main flow
-                            });
-                    }
+
 
                     // Check for rate limit error
                     if (account_info.json_data.error?.type === 'OAuthException' &&
