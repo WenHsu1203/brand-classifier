@@ -94,13 +94,32 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
             } else {
                 // Strip @ symbol if it exists
                 const cleanUsername = account.startsWith('@') ? account.substring(1) : account;
-                
+
                 // Add rate limit check
                 try {
                     const account_info = await getAccountInfo(creds, cleanUsername);
-                    
+
+                    // Fire-and-forget logging to Google Sheets
+                    if (account_info.json_data.error) {
+                        fetch('/api/log-to-sheets', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                username: cleanUsername,
+                                followers: 0,
+                                timestamp: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })
+                            })
+                        })
+                            .catch(sheetError => {
+                                console.error('Failed to log to Google Sheets:', sheetError);
+                                // Error is caught but won't block the main flow
+                            });
+                    }
+
                     // Check for rate limit error
-                    if (account_info.json_data.error?.type === 'OAuthException' && 
+                    if (account_info.json_data.error?.type === 'OAuthException' &&
                         account_info.json_data.error?.code === 4) {
                         throw new Error('這個小時已達到使用上限，請稍後再試 🥲 想要測試可點開右下角對話框留下你的ig 帳號！');
                     }
@@ -187,7 +206,6 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
                         data: { 收益預估: revenueEstimation }
                     });
 
-                    // Fire-and-forget logging to Google Sheets
                     fetch('/api/log-to-sheets', {
                         method: 'POST',
                         headers: {
@@ -202,14 +220,16 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
                         console.error('Failed to log to Google Sheets:', sheetError);
                         // Error is caught but won't block the main flow
                     });
+
+
                 } catch (apiError) {
                     console.error('API Error:', apiError);
                     throw apiError;
                 }
             }
         } catch (error) {
-            const errorMessage = error instanceof Error ? 
-                error.message : 
+            const errorMessage = error instanceof Error ?
+                error.message :
                 '發生錯誤，請稍後再試';
             setError(errorMessage);
             setIsLoading(false);
