@@ -94,108 +94,125 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
             } else {
                 // Strip @ symbol if it exists
                 const cleanUsername = account.startsWith('@') ? account.substring(1) : account;
-                const account_info = await getAccountInfo(creds, cleanUsername);
-                if (account_info.json_data.error) {
-                    throw new Error('輸入錯誤, 或是未開放為商業帳號')
+                
+                // Add rate limit check
+                try {
+                    const account_info = await getAccountInfo(creds, cleanUsername);
+                    
+                    // Check for rate limit error
+                    if (account_info.json_data.error?.type === 'OAuthException' && 
+                        account_info.json_data.error?.code === 4) {
+                        throw new Error('已達到 API 使用上限，請稍後再試 🥲\n想要測試可私訊@iamqhsin');
+                    }
+
+                    if (account_info.json_data.error) {
+                        throw new Error('輸入錯誤, 或是未開放為商業帳號');
+                    }
+
+                    // Transform the data to match InstagramData interface
+                    const transformedData = {
+                        followers: account_info.json_data.business_discovery.followers_count,
+                        bio: account_info.json_data.business_discovery.biography,
+                        posts: account_info.json_data.business_discovery.media.data
+                            .slice(0, 9)
+                            .map((post: { media_type: string; thumbnail_url: any; media_url: any; caption: any; like_count: any; comments_count: any; }) => ({
+                                image_url: post.media_type === 'VIDEO' ? post.thumbnail_url : post.media_url,
+                                caption: post.caption || '',
+                                likes_and_comments: post.like_count + post.comments_count
+                            }))
+                    };
+
+                    // Create a counter to track completed requests
+                    let completedAnalysis = 0;
+                    const totalAnalysis = analysisPrompts.length;
+
+                    // Process analysis prompts
+                    analysisPrompts.forEach(({ key, prompt }) => {
+                        generateChatGPTResponse(prompt, transformedData, 'gpt-4o-mini')
+                            .then(res => {
+                                const analysisResult = { [key]: res[key as keyof typeof res] };
+                                onDataReceived({
+                                    type: 'analysis',
+                                    data: analysisResult,
+                                    username: cleanUsername
+                                });
+
+                                // Increment counter and check if all analysis is complete
+                                completedAnalysis++;
+                                if (completedAnalysis === totalAnalysis) {
+                                    setIsLoading(false); // Only set loading to false when analysis is complete
+                                }
+                            })
+                            .catch(error => {
+                                console.error(`Error generating ${key}:`, error);
+                                // Increment counter even on error to prevent blocking
+                                completedAnalysis++;
+                                if (completedAnalysis === totalAnalysis) {
+                                    setIsLoading(false); // Also handle loading state on error
+                                }
+                            });
+                    });
+
+                    // Process other prompts without affecting loading state
+                    positioningPrompts.forEach(({ key, prompt }) => {
+                        generateChatGPTResponse(prompt, transformedData, 'gpt-4o-mini')
+                            .then(res => {
+                                onDataReceived({
+                                    type: 'positioning',
+                                    data: { [key]: res[key as keyof typeof res] }
+                                });
+                            })
+                            .catch(error => {
+                                console.error(`Error generating ${key}:`, error);
+                            });
+                    });
+
+                    strategyPrompts.forEach(({ key, prompt }) => {
+                        generateChatGPTResponse(prompt, transformedData, 'gpt-4o-mini')
+                            .then(res => {
+                                onDataReceived({
+                                    type: 'strategy',
+                                    data: { [key]: res[key as keyof typeof res] }
+                                });
+                            })
+                            .catch(error => {
+                                console.error(`Error generating ${key}:`, error);
+                            });
+                    });
+
+                    // Calculate revenue estimation immediately
+                    const revenueEstimation = calculateRevenueEstimation(transformedData.followers, transformedData.posts);
+                    onDataReceived({
+                        type: 'revenue',
+                        data: { 收益預估: revenueEstimation }
+                    });
+
+                    // Fire-and-forget logging to Google Sheets
+                    fetch('/api/log-to-sheets', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: cleanUsername,
+                            followers: transformedData.followers,
+                            timestamp: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })
+                        })
+                    }).catch(sheetError => {
+                        console.error('Failed to log to Google Sheets:', sheetError);
+                        // Error is caught but won't block the main flow
+                    });
+                } catch (apiError) {
+                    console.error('API Error:', apiError);
+                    throw apiError;
                 }
-                // Transform the data to match InstagramData interface
-                const transformedData = {
-                    followers: account_info.json_data.business_discovery.followers_count,
-                    bio: account_info.json_data.business_discovery.biography,
-                    posts: account_info.json_data.business_discovery.media.data
-                        .slice(0, 9)
-                        .map((post: { media_type: string; thumbnail_url: any; media_url: any; caption: any; like_count: any; comments_count: any; }) => ({
-                            image_url: post.media_type === 'VIDEO' ? post.thumbnail_url : post.media_url,
-                            caption: post.caption || '',
-                            likes_and_comments: post.like_count + post.comments_count
-                        }))
-                };
-
-                // Create a counter to track completed requests
-                let completedAnalysis = 0;
-                const totalAnalysis = analysisPrompts.length;
-
-                // Process analysis prompts
-                analysisPrompts.forEach(({ key, prompt }) => {
-                    generateChatGPTResponse(prompt, transformedData, 'gpt-4o-mini')
-                        .then(res => {
-                            const analysisResult = { [key]: res[key as keyof typeof res] };
-                            onDataReceived({
-                                type: 'analysis',
-                                data: analysisResult,
-                                username: cleanUsername
-                            });
-
-                            // Increment counter and check if all analysis is complete
-                            completedAnalysis++;
-                            if (completedAnalysis === totalAnalysis) {
-                                setIsLoading(false); // Only set loading to false when analysis is complete
-                            }
-                        })
-                        .catch(error => {
-                            console.error(`Error generating ${key}:`, error);
-                            // Increment counter even on error to prevent blocking
-                            completedAnalysis++;
-                            if (completedAnalysis === totalAnalysis) {
-                                setIsLoading(false); // Also handle loading state on error
-                            }
-                        });
-                });
-
-                // Process other prompts without affecting loading state
-                positioningPrompts.forEach(({ key, prompt }) => {
-                    generateChatGPTResponse(prompt, transformedData, 'gpt-4o-mini')
-                        .then(res => {
-                            onDataReceived({
-                                type: 'positioning',
-                                data: { [key]: res[key as keyof typeof res] }
-                            });
-                        })
-                        .catch(error => {
-                            console.error(`Error generating ${key}:`, error);
-                        });
-                });
-
-                strategyPrompts.forEach(({ key, prompt }) => {
-                    generateChatGPTResponse(prompt, transformedData, 'gpt-4o-mini')
-                        .then(res => {
-                            onDataReceived({
-                                type: 'strategy',
-                                data: { [key]: res[key as keyof typeof res] }
-                            });
-                        })
-                        .catch(error => {
-                            console.error(`Error generating ${key}:`, error);
-                        });
-                });
-
-                // Calculate revenue estimation immediately
-                const revenueEstimation = calculateRevenueEstimation(transformedData.followers, transformedData.posts);
-                onDataReceived({
-                    type: 'revenue',
-                    data: { 收益預估: revenueEstimation }
-                });
-
-                // Fire-and-forget logging to Google Sheets
-                fetch('/api/log-to-sheets', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        username: cleanUsername,
-                        followers: transformedData.followers,
-                        timestamp: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })
-                    })
-                }).catch(sheetError => {
-                    console.error('Failed to log to Google Sheets:', sheetError);
-                    // Error is caught but won't block the main flow
-                });
             }
         } catch (error) {
-            console.error('Error:', error);
-            setError('輸入錯誤, 或是未開放為商業帳號');
-            setIsLoading(false); // Set loading to false on error
+            const errorMessage = error instanceof Error ? 
+                error.message : 
+                '發生錯誤，請稍後再試';
+            setError(errorMessage);
+            setIsLoading(false);
         }
     };
 
@@ -230,7 +247,7 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
             </form>
             {
                 error && (
-                    <p className="text-sm text-red-500 font-medium">
+                    <p className="text-sm text-red-500 font-medium whitespace-pre-line">
                         ❌ {error}
                     </p>
                 )
