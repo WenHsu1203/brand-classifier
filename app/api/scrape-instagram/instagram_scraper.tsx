@@ -98,57 +98,8 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
 
 
                 try {
-                    // Start timing
-                    const startTime = performance.now();
-
-                    const response = await fetch('/api/get-from-sheets', {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        console.error('Sheets API Error Details:', errorData);
-                        throw new Error(errorData.error || 'Failed to fetch from Google Sheets');
-                    }
-
-                    const sheetsData = await response.json();
-                    console.log('Google Sheets data:', sheetsData.data);
-                    console.log('Checking sheets data:', sheetsData.data[1], typeof sheetsData.data[1]); // Debug log
-                    
-                    if (sheetsData.data[1] == 0 || sheetsData.data[1] === "0") { // Check both number and string
-                        try {
-                            // Log to sheets first
-                            await fetch('/api/log-to-sheets', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    username: cleanUsername,
-                                    followers: 0,
-                                    timestamp: new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }),
-                                })
-                            });
-                            
-                            throw new Error('系統維護中, 想要測試可點開右下角對話框留下你的ig 帳號！');
-                            
-                        } catch (sheetError) {
-                            console.error('Failed to log to Google Sheets:', sheetError);
-                            throw new Error('系統維護中, 想要測試可點開右下角對話框留下你的ig 帳號！');
-                        }
-                    }
-
-                    // If we reach here (system is enabled), also log the time
-                    const endTime = performance.now();
-                    const timeSpent = endTime - startTime;
-                    console.log(`Time spent checking sheets status: ${timeSpent.toFixed(2)}ms`);
 
                     const account_info = await getAccountInfo(creds, cleanUsername);
-
-
 
                     // Check for rate limit error
                     if (account_info.json_data.error?.type === 'OAuthException' &&
