@@ -115,12 +115,8 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
                     }
 
                     const sheetsData = await response.json();
-                    if (sheetsData.data[1] == "0") {
-                        // Calculate time spent
-                        const endTime = performance.now();
-                        const timeSpent = endTime - startTime;
-                        console.log(`Time spent checking sheets status: ${timeSpent.toFixed(2)}ms`);
-
+                    console.log('Google Sheets data:', sheetsData.data);
+                    if (sheetsData.data[1] == '0') {
                         // Fire-and-forget logging to Google Sheets
                         fetch('/api/log-to-sheets', {
                             method: 'POST',
