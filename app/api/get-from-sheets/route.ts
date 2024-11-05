@@ -16,6 +16,8 @@ export async function GET() {
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: process.env.GOOGLE_SHEETS_ID,
             range: 'settings!A1:C1',
+            valueRenderOption: 'UNFORMATTED_VALUE',
+            dateTimeRenderOption: 'FORMATTED_STRING',
         });
 
         const rows = response.data.values;
@@ -23,7 +25,15 @@ export async function GET() {
         if (!rows || rows.length === 0) {
             return new Response(
                 JSON.stringify({ message: 'No data found.' }), 
-                { status: 404 }
+                { 
+                    status: 404,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                }
             );
         }
 
@@ -33,6 +43,9 @@ export async function GET() {
                 status: 200,
                 headers: {
                     'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
                 }
             }
         );

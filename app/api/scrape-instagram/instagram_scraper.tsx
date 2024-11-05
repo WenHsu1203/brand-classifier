@@ -116,7 +116,7 @@ export const InstagramScraper = ({ onDataReceived }: InstagramScraperProps) => {
 
                     const sheetsData = await response.json();
                     console.log('Google Sheets data:', sheetsData.data);
-                    if (sheetsData.data[1] === '0') {
+                    if (sheetsData.data[1] === 0) {
                         // Fire-and-forget logging to Google Sheets
                         fetch('/api/log-to-sheets', {
                             method: 'POST',
